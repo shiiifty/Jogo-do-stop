@@ -295,3 +295,17 @@ body {
     align-items: center;
     gap: 20px;
 }
+
+.wrong-password {
+  font-family: "Fredoka", sans-serif;
+  font-size: 14px;
+  color: #ff4b4b;
+  margin: 0;
+  margin-top: 4px;
+  visibility: hidden;      /* escondida por defeito */
+}
+
+.wrong-password.show {
+  visibility: visible;     /* aparece quando tiver a class "show" */
+}
+

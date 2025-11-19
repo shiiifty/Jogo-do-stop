@@ -22,6 +22,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
+  // AVATAR
   const avatarImg = document.getElementById("avatar-img");
   const avatarBtn = document.getElementById("avatar-change-btn");
 
@@ -44,10 +45,15 @@ document.addEventListener("DOMContentLoaded", function () {
   const openPrivatePopup = document.getElementById("private-btn");
   const closePopup = document.getElementById("close-popup");
   const confirmPopup = document.getElementById("confirm-popup");
+  const wrongPwMsg = document.getElementById("wrong-pw-msg");
+  const senhaInput = document.getElementById("senha-input");
 
-  if (popup && openPrivatePopup) {
+  if (popup && openPrivatePopup && closePopup && confirmPopup && senhaInput && wrongPwMsg) {
+  
     openPrivatePopup.addEventListener("click", () => {
       popup.classList.add("show");
+      wrongPwMsg.classList.remove("show");  
+      senhaInput.value = "";                 
     });
 
     closePopup.addEventListener("click", () => {
@@ -55,8 +61,18 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     confirmPopup.addEventListener("click", () => {
+      const pw = senhaInput.value.trim();
+
+      if (pw.length !== 4 || isNaN(pw)) {
+        wrongPwMsg.classList.add("show");
+        return;
+      }
+
+      wrongPwMsg.classList.remove("show");
       popup.classList.remove("show");
-      // window.location.href = "./private-room.html";
+
+      localStorage.setItem("privateRoomPassword", pw);
+      window.location.href = "./private-room.html";
     });
 
     popup.addEventListener("click", (e) => {
