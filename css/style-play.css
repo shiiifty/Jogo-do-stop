@@ -25,6 +25,83 @@ body {
     justify-content: space-between;
 }
 
+.content-row {
+  display: flex;
+  gap: 40px;
+  flex: 1;
+  align-items: flex-start;
+}
+
+.left-panel,
+.right-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content:flex-start;
+  align-items: center;
+
+  background: rgba(27, 92, 228, 0.95);
+  border-radius: 28px;
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.55);
+  padding: 24px 32px;
+  gap: 15px;
+
+  height: 70%;   /* 🔥 garante MESMA ALTURA */
+  width: 450px;
+}
+
+.imagem-online,
+.imagem-offline {
+  width: 70%;      /* ajusta aqui (50%, 60%, 80%...) */
+  height: 50%;
+  object-fit: contain;
+}
+
+.online-party,
+.offline-party {
+  font-size: 64px;
+  font-family: 'Luckiest Guy', cursive;
+  color: #E0AAFF;
+  text-shadow: 0 6px 0 black,
+            0 0 10px rgba(0,0,0,0.4);
+  letter-spacing: 2px;
+  margin: 0;
+}
+
+.online-go,
+.offline-go {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 260px;
+  height: 40px;
+  margin: 8px 0;
+  border-radius: 999px;               /* super arredondado */
+  border: 2px solid #1b1b1b;
+  background: #FFD426;
+  font-family: 'Luckiest Guy', cursive;
+  font-size: 20px;
+  text-transform: uppercase;
+  text-decoration: none;
+  letter-spacing: 1px;
+  cursor: pointer;
+  box-shadow: 0 6px 0 rgba(0,0,0,0.35);
+  transition: transform 0.1s ease, box-shadow 0.1s ease, background 0.1s ease;
+  color: black;
+}
+
+/* efeito hover / clique */
+.online-go:hover,
+.offline-go:hover {
+  background: #ffe97a;
+}
+
+.online-go:active
+.offline-go:active {
+  transform: translateY(2px);
+  box-shadow: 0 3px 0 rgba(0,0,0,0.35);
+}
+
 .logo-text {
   font-size: 64px;
   font-family: 'Luckiest Guy', cursive;
