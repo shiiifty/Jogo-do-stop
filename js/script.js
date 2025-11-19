@@ -8,7 +8,7 @@ document.addEventListener("DOMContentLoaded", function () {
   // Segurança: só adiciona o listener se o botão existir
   if (playBtn) {
     playBtn.addEventListener("click", function () {
-      window.location.href = "play.html";   // vai para play.html
+      window.location.href = "html/play.html";   // vai para play.html
     });
   }
 
