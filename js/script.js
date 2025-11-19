@@ -31,14 +31,38 @@ document.addEventListener("DOMContentLoaded", function () {
     "../avatars/avatar3.png"
   ];
 
-  let currentAvatar = 0;
+  if (avatarImg && avatarBtn) {
+    let currentAvatar = 0;
 
-  avatarBtn.addEventListener("click", function () {
-    currentAvatar = (currentAvatar + 1) % avatars.length;
-    avatarImg.src = avatars[currentAvatar];
-  });
+    avatarBtn.addEventListener("click", function () {
+      currentAvatar = (currentAvatar + 1) % avatars.length;
+      avatarImg.src = avatars[currentAvatar];
+    });
+  }
 
-  const privateBtn = document.getElementById("private-btn");
-  
+  const popup = document.getElementById("popup-overlay");
+  const openPrivatePopup = document.getElementById("private-btn");
+  const closePopup = document.getElementById("close-popup");
+  const confirmPopup = document.getElementById("confirm-popup");
 
+  if (popup && openPrivatePopup) {
+    openPrivatePopup.addEventListener("click", () => {
+      popup.classList.add("show");
+    });
+
+    closePopup.addEventListener("click", () => {
+      popup.classList.remove("show");
+    });
+
+    confirmPopup.addEventListener("click", () => {
+      popup.classList.remove("show");
+      // window.location.href = "./private-room.html";
+    });
+
+    popup.addEventListener("click", (e) => {
+      if (e.target === popup) {
+        popup.classList.remove("show");
+      }
+    });
+  }
 });

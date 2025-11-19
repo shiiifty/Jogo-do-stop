@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html lang="pt">
     <head>
-    <meta charset="UTF-8">
-    <title>STOP! - Jogo</title>
-    <link rel="stylesheet" href="../css/style-create-room.css">
-     <link href="https://fonts.googleapis.com/css2?family=Luckiest+Guy&display=swap" rel="stylesheet">
+        <meta charset="UTF-8">
+        <title>STOP! - Jogo</title>
+        <link rel="stylesheet" href="../css/style-create-room.css">
+        <link href="https://fonts.googleapis.com/css2?family=Luckiest+Guy&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300;400;500&display=swap" rel="stylesheet">
     </head>
 
     <body>
@@ -34,6 +35,22 @@
             </div>
             <a href="../index.html" class="voltar-menu">Voltar ao Menu</a> 
         </div>  
+        <div id="popup-overlay" class="popup-overlay">
+            <div class="popup-box">
+
+                <button id="close-popup" class="popup-close">✕</button>
+
+                <h2 class="popup-title">Private room</h2>
+                
+                <div class="senha-texto">
+                    <p class="senha">Introduza uma senha de 4 dígitos</p>
+                    <input type="password   " class="senha-input" placeholder="Senha">
+
+                    <button id="confirm-popup" class="popup-confirm">Continuar</button>
+                </div>
+            </div>
+        </div>
+        <script src="../js/script.js"></script>
     </body>
 </html>
     
