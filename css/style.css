@@ -1,0 +1,158 @@
+/* Fundo geral, sem scroll */
+body {
+  background-color: #C77DFF;
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;         /* sem scroll */
+}
+
+/* Caixa grande 16:9 centrada */
+.main-box {
+  width: 90%;
+  max-width: 1200px;
+  max-height: calc(100vh - 120px);   /* margem em cima/baixo */
+  aspect-ratio: 16 / 9;
+  background: #4169E1;
+  border-radius: 24px;
+  box-shadow: 0px 20px 40px rgba(0,0,0,0.5);
+
+  /* IMPORTANTE: coluna, logo em cima, conteúdo em baixo */
+  display: flex;
+  flex-direction: column;
+  padding: 40px 80px;
+  box-sizing: border-box;
+}
+
+/* Linha do logo – centro horizontal, margem por baixo */
+.logo-row {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 40px;
+}
+
+/* Já não queremos height: 100vh aqui! */
+.logo-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 20px;
+}
+
+.content-row {
+  display: flex;
+  gap: 40px;
+  flex: 1;
+  align-items: flex-start;
+}
+
+
+.left-panel,
+.right-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  background: rgba(27, 92, 228, 0.95);
+  border-radius: 28px;
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.55);
+  padding: 24px 32px;
+
+  height: 80%;   /* 🔥 garante MESMA ALTURA */
+}
+
+/* estilo base para todos os botões do menu */
+.menu-button {
+  width: 260px;
+  height: 40px;
+  margin: 8px 0;
+  border-radius: 999px;               /* super arredondado */
+  border: 2px solid #1b1b1b;
+  background: #FFD426;
+  font-family: 'Luckiest Guy', cursive;
+  font-size: 14px;
+  letter-spacing: 1px;
+  cursor: pointer;
+  box-shadow: 0 6px 0 rgba(0,0,0,0.35);
+  transition: transform 0.1s ease, box-shadow 0.1s ease, background 0.1s ease;
+}
+
+/* efeito hover / clique */
+.menu-button:hover {
+  background: #ffe97a;
+}
+
+.menu-button:active {
+  transform: translateY(2px);
+  box-shadow: 0 3px 0 rgba(0,0,0,0.35);
+}
+
+
+/* Exemplo de estilo para o avatar e input */
+.avatar {
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  background: #fff;
+  margin-bottom: 16px;
+  align-items: center;
+}
+
+.text-input {
+  width: 100%;
+  max-width: 240px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  align-items: center;
+  background: #FFD426;
+  border: 2px solid #1b1b1b;
+}
+
+.logo-text {
+  font-size: 64px;
+  font-family: 'Luckiest Guy', cursive;
+  color: #FFD426;
+  text-shadow: 0 6px 0 black,
+            0 0 10px rgba(0,0,0,0.4);
+  letter-spacing: 2px;
+  margin: 0;
+}
+
+.logo-rays {
+  position: relative;
+  width: 140px;
+  height: 40px;
+}
+
+/* RAIOS EM CIMA -> empurra um bocadinho para cima */
+.logo-rays-top {
+  margin-bottom: -60px;
+}
+
+/* RAIOS EM BAIXO -> empurra um bocadinho para baixo */
+.logo-rays-bottom {
+  margin-top: 10px;
+}
+
+/* ESTILO DOS RAIOS (SPAN) */
+.logo-rays span {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 8px;
+  height: 18px;
+  background: #ffffff;
+  border-radius: 999px;
+  transform-origin: center -20px;
+}
+
+.logo-rays-bottom span:nth-child(1) { transform: translate(-50%, -50%) rotate(0deg); }
+.logo-rays-bottom span:nth-child(2) { transform: translate(-50%, -50%) rotate(60deg); }
+.logo-rays-bottom span:nth-child(3) { transform: translate(-50%, -50%) rotate(-60deg); }
+.logo-rays-top span:nth-child(1) { transform: translate(-50%, -50%) rotate(180deg); }
+.logo-rays-top span:nth-child(2) { transform: translate(-50%, -50%) rotate(-120deg); }
+.logo-rays-top span:nth-child(3) { transform: translate(-50%, -50%) rotate(120deg); }
