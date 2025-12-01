@@ -73,14 +73,20 @@ timeLeft = config.timePerRound;
   }
 
   function generateRandomLetter() {
-    const letters =
-      config.letters && config.letters.length > 0
-        ? config.letters
-        : defaultConfig.letters;
+    const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
 
-    const idx = Math.floor(Math.random() * letters.length);
-    return letters[idx].toUpperCase();
+    if (config.letters && config.letters.length > 0) {
+      // remover letras escolhidas pelo user
+      for (const char of config.letters.toUpperCase()) {
+        const idx = alphabet.indexOf(char);
+        if (idx !== -1) alphabet.splice(idx, 1);
+      }
+    }
+
+    const idx = Math.floor(Math.random() * alphabet.length);
+    return alphabet[idx];
   }
+
 
   function startRound() {
     if (roundRunning) return;
@@ -185,7 +191,6 @@ timeLeft = config.timePerRound;
     }, 1800);
   }
 
-
   if (startBtn) {
     startBtn.addEventListener("click", () => {
       resetRoundUI();
@@ -204,6 +209,7 @@ timeLeft = config.timePerRound;
         fancyEndTransition();
         return;
       }
+
 
       scoreOverlay.classList.remove("show");
     });
