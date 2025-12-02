@@ -55,6 +55,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const configOverlay   = document.getElementById("config-overlay");
   const configTime      = document.getElementById("config-time");
   const configLetters   = document.getElementById("config-letters");
+  const configRounds    = document.getElementById("config-rounds");
   const configCancelBtn = document.getElementById("config-cancel");
   const configStartBtn  = document.getElementById("config-start");
 
@@ -85,14 +86,13 @@ document.addEventListener("DOMContentLoaded", function () {
         .toUpperCase()
         .replace(/[^A-Z]/g, "");
 
-      // se o utilizador não escrever nada -> todas as letras
-      if (!letters) {
-        letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-      }
+      const total_rounds = parseInt(configRounds.value, 10) || 10;
+      
 
       const gameConfig = {
         timePerRound: time,
         letters: letters,
+        rounds: total_rounds,
       };
 
       localStorage.setItem("gameConfig", JSON.stringify(gameConfig));

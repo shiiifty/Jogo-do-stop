@@ -17,7 +17,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const closeScoreBtn  = document.getElementById("close-score-btn");
 
   let currentLetter = null;
-  const TOTAL_ROUNDS = 10;  // ← podes mudar aqui
+  let total_rounds = 10;  // ← podes mudar aqui
   let currentRound = 0;
   let totalScore = 0;       // pontuação acumulada
 
@@ -29,6 +29,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const defaultConfig = {
     timePerRound: 60,
     letters: "",
+    rounds: 10,
   };
 
   let config = { ...defaultConfig };
@@ -44,12 +45,13 @@ document.addEventListener("DOMContentLoaded", () => {
     localStorage.removeItem("gameConfig");
   }
 
-timeLeft = config.timePerRound;
+  let timeLeft = config.timePerRound;
+  total_rounds = config.rounds;
   let timerId = null;
   let roundRunning = false;
 
   if (roundSpan) {
-    roundSpan.textContent = `0/${TOTAL_ROUNDS}`;
+    roundSpan.textContent = `0/${total_rounds}`;
   }
 
   function setInputsEnabled(enabled) {
@@ -90,7 +92,7 @@ timeLeft = config.timePerRound;
   function startRound() {
     if (roundRunning) return;
 
-    if (currentRound >= TOTAL_ROUNDS) {
+    if (currentRound >= total_rounds) {
       alert("Já jogaste todas as rondas deste jogo!");
       return;
     }
@@ -98,7 +100,7 @@ timeLeft = config.timePerRound;
     currentRound++;
 
     if (roundSpan) {
-      roundSpan.textContent = `${currentRound}/${TOTAL_ROUNDS}`;
+      roundSpan.textContent = `${currentRound}/${total_rounds}`;
     }
 
     roundRunning = true;
@@ -203,7 +205,7 @@ timeLeft = config.timePerRound;
 
   if (closeScoreBtn) {
     closeScoreBtn.addEventListener("click", () => {
-      if (currentRound === TOTAL_ROUNDS) {
+      if (currentRound === total_rounds) {
         scoreOverlay.classList.remove("show");
         fancyEndTransition();
         return;
