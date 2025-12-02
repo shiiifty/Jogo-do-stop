@@ -28,7 +28,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // --------- LER CONFIG DO POPUP ----------
   const defaultConfig = {
     timePerRound: 60,
-    letters: "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+    letters: "",
   };
 
   let config = { ...defaultConfig };
