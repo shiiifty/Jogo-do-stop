@@ -51,7 +51,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
-   const offlineBtn      = document.getElementById("offline-btn");
+  const offlineBtn      = document.getElementById("offline-btn");
   const configOverlay   = document.getElementById("config-overlay");
   const configTime      = document.getElementById("config-time");
   const configLetters   = document.getElementById("config-letters");

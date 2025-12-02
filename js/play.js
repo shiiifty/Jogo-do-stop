@@ -76,7 +76,6 @@ timeLeft = config.timePerRound;
     const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
 
     if (config.letters && config.letters.length > 0) {
-      // remover letras escolhidas pelo user
       for (const char of config.letters.toUpperCase()) {
         const idx = alphabet.indexOf(char);
         if (idx !== -1) alphabet.splice(idx, 1);
