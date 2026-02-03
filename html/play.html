@@ -24,12 +24,12 @@
                 <div class="left-panel">
                     <img src="../img/online.webp" class="imagem-online">
                     <p class="online-party">Online</p>
-                    <button class="online-go" id="online-btn">GO!</button>
+                    <button class="online-go" id="online-btn" type="button">GO!</button>
                 </div>
                 <div class="right-panel">
                     <img src="../img/offline.png" class="imagem-offline">
                     <p class="offline-party">Offline</p>
-                    <button class="offline-go" id="offline-btn">GO!</button>
+                    <button class="offline-go" id="offline-btn" type="button">GO!</button>
                 </div>
             </div>
             <a href="../index.html" class="voltar-menu">Voltar ao Menu</a> 
@@ -75,7 +75,32 @@
                 </div>
             </div>
         </div> 
+        <div id="join-modal" class="join-overlay hidden">
+            <div class="join-card" role="dialog" aria-modal="true">
+                <h2 class="join-title">ENTRAR NUMA SALA</h2>
+
+                <label class="join-label">CÓDIGO DA SALA:</label>
+                <input id="join-room-id" class="join-input" type="text" maxlength="10" placeholder="Ex: ABC123" />
+
+                <div id="pw-block" class="hidden">
+                <label class="join-label">PASSWORD:</label>
+                <input id="join-room-pw" class="join-input" type="password" placeholder="Password da sala" />
+                <p id="pw-error" class="join-error hidden">Password errada.</p>
+                </div>
+
+                <p id="join-error" class="join-error hidden"></p>
+
+                <div class="join-actions">
+                <button id="join-cancel" type="button" class="join-btn join-btn-cancel">CANCELAR</button>
+                <button id="join-submit" type="button" class="join-btn join-btn-confirm">ENTRAR</button>
+                </div>
+            </div>
+        </div>
+
+        <script src="/socket.io/socket.io.js"></script>
+        <script src="../js/online-client.js"></script>
         <script src="../js/script.js"></script>
+
     </body>
 </html>
     

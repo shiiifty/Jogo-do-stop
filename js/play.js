@@ -1,5 +1,8 @@
-// js/play.js
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", function () {
+  const params = new URLSearchParams(window.location.search);
+  const roomIdRaw = params.get("room");
+  const roomId = roomIdRaw ? roomIdRaw.toUpperCase() : null;
+  const isOnline = !!roomId;
 
   const nicknameSpan = document.getElementById("nickname-span");
   const letterSpan   = document.getElementById("letter-span");
@@ -17,19 +20,18 @@ document.addEventListener("DOMContentLoaded", () => {
   const closeScoreBtn  = document.getElementById("close-score-btn");
 
   let currentLetter = null;
-  let total_rounds = 10;  // ← podes mudar aqui
+  let total_rounds = 10;
   let currentRound = 0;
-  let totalScore = 0;       // pontuação acumulada
+  let totalScore = 0;
 
-  // nickname
   const nickname = localStorage.getItem("playerNickname") || "Player 1";
+  const avatar = localStorage.getItem("playerAvatar") || "default";
   if (nicknameSpan) nicknameSpan.textContent = nickname;
 
-  // --------- LER CONFIG DO POPUP ----------
   const defaultConfig = {
     timePerRound: 60,
     letters: "",
-    rounds: 10,
+    rounds: 10
   };
 
   let config = { ...defaultConfig };
@@ -47,30 +49,29 @@ document.addEventListener("DOMContentLoaded", () => {
 
   let timeLeft = config.timePerRound;
   total_rounds = config.rounds;
+
   let timerId = null;
   let roundRunning = false;
 
-  if (roundSpan) {
-    roundSpan.textContent = `0/${total_rounds}`;
-  }
+  if (roundSpan) roundSpan.textContent = "0/" + total_rounds;
 
   function setInputsEnabled(enabled) {
-    answerInputs.forEach(input => {
+    answerInputs.forEach(function (input) {
       input.disabled = !enabled;
-      if (!enabled) {
-        input.blur();
-      }
+      if (!enabled) input.blur();
     });
   }
 
   function resetRoundUI() {
     timeLeft = config.timePerRound;
-    timerSpan.textContent = timeLeft.toString();
-    letterSpan.textContent = "-";
-    answerInputs.forEach(input => {
+    if (timerSpan) timerSpan.textContent = String(timeLeft);
+    if (letterSpan) letterSpan.textContent = "-";
+
+    answerInputs.forEach(function (input) {
       input.classList.remove("valida", "erro");
       input.value = "";
     });
+
     setInputsEnabled(false);
   }
 
@@ -88,8 +89,7 @@ document.addEventListener("DOMContentLoaded", () => {
     return alphabet[idx];
   }
 
-
-  function startRound() {
+  function startRoundOffline() {
     if (roundRunning) return;
 
     if (currentRound >= total_rounds) {
@@ -98,28 +98,22 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     currentRound++;
-
-    if (roundSpan) {
-      roundSpan.textContent = `${currentRound}/${total_rounds}`;
-    }
+    if (roundSpan) roundSpan.textContent = currentRound + "/" + total_rounds;
 
     roundRunning = true;
 
-    const letter = generateRandomLetter();
-    currentLetter = letter;
-    letterSpan.textContent = letter;
+    currentLetter = generateRandomLetter();
+    if (letterSpan) letterSpan.textContent = currentLetter;
 
     setInputsEnabled(true);
+
     timeLeft = config.timePerRound;
-    timerSpan.textContent = timeLeft.toString();
+    if (timerSpan) timerSpan.textContent = String(timeLeft);
 
-    timerId = setInterval(() => {
+    timerId = setInterval(function () {
       timeLeft--;
-      timerSpan.textContent = timeLeft.toString();
-
-      if (timeLeft <= 0) {
-        endRound();
-      }
+      if (timerSpan) timerSpan.textContent = String(timeLeft);
+      if (timeLeft <= 0) endRound();
     }, 1000);
   }
 
@@ -138,8 +132,8 @@ document.addEventListener("DOMContentLoaded", () => {
     let validCount = 0;
     let roundScore = 0;
 
-    answerInputs.forEach(input => {
-      const cat   = input.dataset.category;   // ex: "nomes"
+    answerInputs.forEach(function (input) {
+      const cat = input.dataset.category;
       const value = input.value.trim();
 
       answers[cat] = value;
@@ -151,32 +145,28 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (ok) {
         validCount++;
-        roundScore += 10; // 10 pontos por resposta válida
+        roundScore += 10;
       }
-
-      console.log(`cat=${cat}, value="${value}", ok=${ok}`);
 
       input.classList.toggle("valida", ok);
       input.classList.toggle("erro", !ok);
     });
 
-    console.log("Respostas desta ronda:", answers);
-
-    // acumular pontuação total
     totalScore += roundScore;
 
-    // atualizar overlay
-    if (
-      scoreOverlay &&
-      scoreValueSpan &&
-      validCountSpan &&
-      totalCountSpan &&
-      totalScoreSpan
-    ) {
-      scoreValueSpan.textContent = roundScore.toString();
-      validCountSpan.textContent = validCount.toString();
-      totalCountSpan.textContent = answerInputs.length.toString();
-      totalScoreSpan.textContent = totalScore.toString();
+    if (isOnline && window.api && window.api.submit) {
+      window.api.submit(roomId, answers, roundScore, function (res) {
+        if (!res || !res.ok) {
+          console.warn("submit falhou:", res);
+        }
+      });
+    }
+
+    if (scoreOverlay && scoreValueSpan && validCountSpan && totalCountSpan && totalScoreSpan) {
+      scoreValueSpan.textContent = String(roundScore);
+      validCountSpan.textContent = String(validCount);
+      totalCountSpan.textContent = String(answerInputs.length);
+      totalScoreSpan.textContent = String(totalScore);
 
       scoreOverlay.classList.add("show");
     }
@@ -184,38 +174,90 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function fancyEndTransition() {
     const overlay = document.getElementById("end-transition");
-    overlay.classList.add("show");
+    if (overlay) overlay.classList.add("show");
 
-    // espera a animação terminar (1.8s total), depois sai
-    setTimeout(() => {
+    setTimeout(function () {
       window.location.href = "../index.html";
     }, 1800);
   }
 
   if (startBtn) {
-    startBtn.addEventListener("click", () => {
+    startBtn.addEventListener("click", function () {
       resetRoundUI();
-      startRound();
+
+      if (!isOnline) {
+        startRoundOffline();
+        return;
+      }
+
+      if (window.api && window.api.startRound) {
+        window.api.startRound(roomId, function (res) {
+          if (!res || !res.ok) {
+            alert(res && res.error ? res.error : "Não deu para iniciar o round.");
+          }
+        });
+      } else {
+        alert("API online não está carregada. Confirma os <script> no game.html.");
+      }
     });
   }
 
-  if (stopBtn) {
-    stopBtn.addEventListener("click", endRound);
-  }
+  if (stopBtn) stopBtn.addEventListener("click", endRound);
 
   if (closeScoreBtn) {
-    closeScoreBtn.addEventListener("click", () => {
+    closeScoreBtn.addEventListener("click", function () {
       if (currentRound === total_rounds) {
         scoreOverlay.classList.remove("show");
         fancyEndTransition();
         return;
       }
-
-
       scoreOverlay.classList.remove("show");
     });
   }
 
+  if (isOnline) {
+    if (!window.api || !window.api.joinRoom || !window.socket) {
+      alert("Online não está carregado. Confirma os <script> no game.html.");
+    } else {
+      window.api.joinRoom(
+        { roomId: roomId, nickname: nickname, avatar: avatar, password: "" },
+        function (res) {
+          if (!res || !res.ok) {
+            alert(res && res.error ? res.error : "Erro ao entrar na sala.");
+            window.location.href = "../index.html";
+          }
+        }
+      );
 
+      window.socket.on("game:roundStarted", function (payload) {
+        currentRound = payload.round;
+        total_rounds = payload.rounds;
+        currentLetter = payload.letter;
+
+        if (roundSpan) roundSpan.textContent = currentRound + "/" + total_rounds;
+        if (letterSpan) letterSpan.textContent = currentLetter;
+
+        roundRunning = true;
+        setInputsEnabled(true);
+
+        if (timerId !== null) clearInterval(timerId);
+
+        function tick() {
+          const elapsed = Math.floor((Date.now() - payload.roundStartAt) / 1000);
+          const left = Math.max(0, payload.timePerRound - elapsed);
+          timeLeft = left;
+          if (timerSpan) timerSpan.textContent = String(left);
+          if (left <= 0) endRound();
+        }
+
+        tick();
+        timerId = setInterval(tick, 250);
+      });
+
+      window.socket.on("game:roundEnded", function (payload) {
+        console.log("server round ended:", payload);
+      });
+    }
+  }
   resetRoundUI();
 });

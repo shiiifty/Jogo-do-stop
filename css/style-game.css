@@ -46,9 +46,7 @@ body.fade-out {
   text-shadow: 0 6px 0 #b8860b;
 }
 
-/* ============================
-   LAYOUT DE ESQUERDA + DIREITA
-   ============================ */
+
 .content-row {
   display: flex;
   flex: 1;
@@ -62,9 +60,6 @@ body.fade-out {
   color: white;
 }
 
-/* ============================
-   INFO DO JOGO (nickname / letra / tempo)
-   ============================ */
 .nickname-label,
 .round-info {
   font-size: 22px;
@@ -72,9 +67,6 @@ body.fade-out {
   text-shadow: 0 3px 2px rgba(0,0,0,0.3);
 }
 
-/* ============================
-   BOTÕES START / STOP
-   ============================ */
 .buttons-row {
   display: flex;
   gap: 20px;
@@ -100,7 +92,6 @@ body.fade-out {
   box-shadow: 0px 3px 0 #b8860b;
 }
 
-/* STOP versão vermelha */
 #stop-btn {
   background: #FF595E;
   box-shadow: 0px 6px 0 #b84043;
@@ -110,9 +101,6 @@ body.fade-out {
   box-shadow: 0px 3px 0 #b84043;
 }
 
-/* ============================
-   INPUTS DAS CATEGORIAS
-   ============================ */
 .inputs-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -137,15 +125,11 @@ body.fade-out {
   outline: none;
 }
 
-/* Quando os inputs estiverem desativados */
 .answer-input:disabled {
   background: #dddddd;
   opacity: 0.8;
 }
 
-/* ============================
-   RESPONSIVO
-   ============================ */
 @media (max-width: 900px) {
   .content-row {
     flex-direction: column;
@@ -165,36 +149,31 @@ body.fade-out {
   }
 }
 
-/* Painel esquerdo organizado em topo + fundo */
 .left-panel {
   display: flex;
   flex-direction: column;
-  justify-content: space-between; /* manda os botões para baixo */
+  justify-content: space-between; 
   padding: 10px 0;
 }
 
-/* Conteúdo superior */
 .top-info {
   display: flex;
   flex-direction: column;
   gap: 16px;
 }
 
-/* Labels normais */
 .info-label {
   font-size: 22px;
   color: #ffffff;
   text-shadow: 0 3px 2px rgba(0,0,0,0.5);
 }
 
-/* Letra gigante */
 .big-letter {
   font-size: 48px;
   color: #FFD93D;
   text-shadow: 0px 6px 0px rgba(0,0,0,0.4);
 }
 
-/* Timer super chamativo */
 .big-timer {
   font-size: 46px;
   font-weight: bold;
@@ -203,7 +182,6 @@ body.fade-out {
   letter-spacing: 2px;
 }
 
-/* Botões no fundo */
 .bottom-buttons {
   display: flex;
   gap: 20px;
@@ -212,40 +190,38 @@ body.fade-out {
   justify-content: center;
 }
 
-/* Botão START */
 .start-btn {
   background: #FFD93D;
   box-shadow: 0 6px 0 #c7a02c;
 }
 
-/* Botão STOP */
 .stop-btn {
   background: #FF595E;
   box-shadow: 0 6px 0 #c94e4e;
 }
 
 .answer-input.valida {
-  border: 3px solid #2ecc71;      /* verde */
+  border: 3px solid #2ecc71;      
   box-shadow: 0 0 6px rgba(46, 204, 113, 0.7);
 }
 
 .answer-input.erro {
-  border: 3px solid #e74c3c;      /* vermelho */
+  border: 3px solid #e74c3c;    
   box-shadow: 0 0 6px rgba(231, 76, 60, 0.7);
 }
 
 .score-overlay {
   position: fixed;
-  inset: 0; /* top:0; right:0; bottom:0; left:0 */
+  inset: 0; 
   background: rgba(0, 0, 0, 0.55);
-  display: none;             /* escondido por defeito */
+  display: none;            
   align-items: center;
   justify-content: center;
   z-index: 999;
 }
 
 .score-overlay.show {
-  display: flex;             /* mostra como flex quando tem .show */
+  display: flex;             
 }
 
 .score-modal {
@@ -297,12 +273,10 @@ body.fade-out {
 }
 
 #round-span {
-  font-size: 36px;          /* torna a ronda maior */
+  font-size: 36px;          
   font-weight: bold;
   text-shadow: 0 6px 0 rgba(0,0,0,0.3);
 }
-
-/* ----------- OVERLAY DE TRANSIÇÃO BONITO ----------- */
 
 #end-transition {
   position: fixed;

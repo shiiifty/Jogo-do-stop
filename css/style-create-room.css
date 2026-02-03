@@ -48,14 +48,14 @@ body {
   padding: 24px 32px;
   gap: 20px;
 
-  height: auto;                 /* experimenta 50% ou 45% em vez de 60% */
+  height: auto;               
   max-height: 360px;  
   width: 450px;
 }
 
 .imagem-public,
 .imagem-private {
-  width: 45%;      /* ajusta aqui (50%, 60%, 80%...) */
+  width: 45%;      
   height: auto;
   object-fit: contain;
 }
@@ -79,7 +79,7 @@ body {
   width: 260px;
   height: 40px;
   margin: 8px 0;
-  border-radius: 999px;               /* super arredondado */
+  border-radius: 999px;            
   border: 2px solid #1b1b1b;
   background: #FFD426;
   font-family: 'Luckiest Guy', cursive;
@@ -93,7 +93,6 @@ body {
   color: black;
 }
 
-/* efeito hover / clique */
 .public-go:hover,
 .private-go:hover {
   background: #ffe97a;
@@ -166,17 +165,14 @@ body {
   height: 40px;
 }
 
-/* RAIOS EM CIMA -> empurra um bocadinho para cima */
 .logo-rays-top {
   margin-bottom: -60px;
 }
 
-/* RAIOS EM BAIXO -> empurra um bocadinho para baixo */
 .logo-rays-bottom {
   margin-top: 10px;
 }
 
-/* ESTILO DOS RAIOS (SPAN) */
 .logo-rays span {
   position: absolute;
   left: 50%;
@@ -195,7 +191,6 @@ body {
 .logo-rays-top span:nth-child(2) { transform: translate(-50%, -50%) rotate(-120deg); }
 .logo-rays-top span:nth-child(3) { transform: translate(-50%, -50%) rotate(120deg); }
 
-/* OVERLAY ESCURO */
 .popup-overlay {
   position: fixed;
   inset: 0;
@@ -214,7 +209,6 @@ body {
   pointer-events: all;
 }
 
-/* CAIXA DO POPUP */
 .popup-box {
   background: #f5ecff;
   padding: 40px;
@@ -229,7 +223,6 @@ body {
   text-align: center;
 }
 
-/* BOTÃO X */
 .popup-close {
   position: absolute;
   right: 20px;
@@ -245,7 +238,6 @@ body {
   box-shadow: 0 5px 0 rgba(0,0,0,0.3);
 }
 
-/* TÍTULO */
 .popup-title {
   font-size: 40px;
   font-family: 'Luckiest Guy', cursive;
@@ -300,10 +292,10 @@ body {
   color: #ff4b4b;
   margin: 0;
   margin-top: 4px;
-  visibility: hidden;      /* escondida por defeito */
+  visibility: hidden;      
 }
 
 .wrong-password.show {
-  visibility: visible;     /* aparece quando tiver a class "show" */
+  visibility: visible;    
 }
 

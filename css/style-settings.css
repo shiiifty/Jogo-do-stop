@@ -103,17 +103,14 @@ body {
   height: 40px;
 }
 
-/* RAIOS EM CIMA -> empurra um bocadinho para cima */
 .logo-rays-top {
   margin-bottom: -60px;
 }
 
-/* RAIOS EM BAIXO -> empurra um bocadinho para baixo */
 .logo-rays-bottom {
   margin-top: 10px;
 }
 
-/* ESTILO DOS RAIOS (SPAN) */
 .logo-rays span {
   position: absolute;
   left: 50%;

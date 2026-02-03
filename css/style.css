@@ -1,4 +1,3 @@
-/* Fundo geral, sem scroll */
 body {
   background-color: #C77DFF;
   margin: 0;
@@ -6,34 +5,30 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  overflow: hidden;         /* sem scroll */
+  overflow: hidden;       
 }
 
-/* Caixa grande 16:9 centrada */
 .main-box {
   width: 90%;
   max-width: 1200px;
-  max-height: calc(100vh - 120px);   /* margem em cima/baixo */
+  max-height: calc(100vh - 120px);   
   aspect-ratio: 16 / 9;
   background: #4169E1;
   border-radius: 24px;
   box-shadow: 0px 20px 40px rgba(0,0,0,0.5);
 
-  /* IMPORTANTE: coluna, logo em cima, conteúdo em baixo */
   display: flex;
   flex-direction: column;
   padding: 40px 80px;
   box-sizing: border-box;
 }
 
-/* Linha do logo – centro horizontal, margem por baixo */
 .logo-row {
   display: flex;
   justify-content: center;
   margin-bottom: 40px;
 }
 
-/* Já não queremos height: 100vh aqui! */
 .logo-container {
   display: flex;
   flex-direction: column;
@@ -62,15 +57,14 @@ body {
   box-shadow: 0 18px 45px rgba(0, 0, 0, 0.55);
   padding: 24px 32px;
 
-  height: 80%;   /* 🔥 garante MESMA ALTURA */
+  height: 80%;   
 }
 
-/* estilo base para todos os botões do menu */
 .menu-button {
   width: 260px;
   height: 40px;
   margin: 8px 0;
-  border-radius: 999px;               /* super arredondado */
+  border-radius: 999px;               
   border: 2px solid #1b1b1b;
   background: #FFD426;
   font-family: 'Luckiest Guy', cursive;
@@ -81,7 +75,6 @@ body {
   transition: transform 0.1s ease, box-shadow 0.1s ease, background 0.1s ease;
 }
 
-/* efeito hover / clique */
 .menu-button:hover {
   background: #ffe97a;
 }
@@ -97,10 +90,9 @@ body {
   justify-content: center;
   align-items: center;
   position: relative;
-  margin-bottom: 25px;   /* espaço entre o avatar e o "Nickname" */
+  margin-bottom: 25px;  
 }
 
-/* a bola branca */
 .avatar-circle {
   width: 180px;
   height: 180px;
@@ -176,17 +168,14 @@ body {
   height: 40px;
 }
 
-/* RAIOS EM CIMA -> empurra um bocadinho para cima */
 .logo-rays-top {
   margin-bottom: -60px;
 }
 
-/* RAIOS EM BAIXO -> empurra um bocadinho para baixo */
 .logo-rays-bottom {
   margin-top: 10px;
 }
 
-/* ESTILO DOS RAIOS (SPAN) */
 .logo-rays span {
   position: absolute;
   left: 50%;
