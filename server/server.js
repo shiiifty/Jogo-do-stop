@@ -9,7 +9,19 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server);
+//const io = new Server(server);
+
+const io = new Server(server, {
+  cors: {
+    origin: [
+      "http://localhost:5500",
+      "http://127.0.0.1:5500",
+      "https://shiiifty.github.io"
+    ],
+    methods: ["GET", "POST"]
+  }
+});
+
 
 app.use(express.static(path.join(__dirname, "..")));
 
@@ -252,4 +264,4 @@ io.on("connection", (socket) => {
 });
 
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => console.log("Server on http://localhost:" + PORT));
+server.listen(PORT, "0.0.0.0", () => console.log("Server on http://localhost:" + PORT));
