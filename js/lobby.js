@@ -2,6 +2,34 @@ document.addEventListener("DOMContentLoaded", function () {
   const params = new URLSearchParams(window.location.search);
   const roomId = String(params.get("room") || "").trim().toUpperCase();
 
+  const modal = document.getElementById("start-modal");
+  const countdownEl = document.getElementById("countdown");
+  let countdownTimer = null;
+  
+  function openCountdownModal(startAt) {
+    if (!modal || !countdownEl) return;
+
+    modal.classList.remove("hidden");
+
+    function tick() {
+      const msLeft = startAt - Date.now();
+      const secLeft = Math.max(0, Math.ceil(msLeft / 1000));
+      countdownEl.textContent = secLeft;
+
+      if (msLeft <= 0) {
+        clearInterval(countdownTimer);
+        countdownTimer = null;
+
+        modal.classList.add("hidden");
+        window.location.href = "/html/gameOnline.html?room=" + encodeURIComponent(roomId);
+      }
+    }
+
+    if (countdownTimer) clearInterval(countdownTimer);
+    tick();
+    countdownTimer = setInterval(tick, 200);
+  }
+
   if (!roomId) {
     alert("Falta o código da sala no URL. Ex: lobby.html?room=ABC123");
     return;
@@ -65,15 +93,20 @@ document.addEventListener("DOMContentLoaded", function () {
       : "À espera que o host inicie o jogo...";
   });
 
-  if (startBtn) {
+   if (startBtn) {
     startBtn.addEventListener("click", function () {
       localStorage.removeItem("roomPassword");
-      window.socket.emit("game:goToGame", { roomId });
+
+      window.socket.emit("game:goToGame", { roomId, seconds: 5 }, function (res) {
+        if (res && res.ok) return;
+        alert((res && res.error) ? res.error : "Erro ao iniciar o jogo.");
+      });
     });
   }
 
-  window.socket.on("game:goToGame", function (payload) {
+  window.socket.on("game:starting", function (payload) {
     if (!payload || String(payload.roomId).toUpperCase() !== roomId) return;
-    window.location.href = "/html/game.html?room=" + encodeURIComponent(roomId);
+    if (!payload.startAt) return;
+    openCountdownModal(payload.startAt);
   });
 });

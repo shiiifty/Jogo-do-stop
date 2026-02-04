@@ -102,6 +102,22 @@ function emitRoomUpdate(roomId) {
 }
 
 io.on("connection", (socket) => {
+  socket.on("game:getState", ({ roomId }, cb) => {
+    roomId = String(roomId || "").trim().toUpperCase();
+    const room = rooms.get(roomId);
+
+    if (!room) {
+      if (cb) cb({ ok: false, error: "Sala não existe." });
+      return;
+    }
+
+    if (cb) cb({
+      ok: true,
+      state: room.state,
+      config: room.config
+    });
+  });
+
 
   socket.on("room:create", ({ nickname, avatar, password, config }, cb) => {
     const roomId = makeRoomId();
@@ -112,7 +128,7 @@ io.on("connection", (socket) => {
       password: password || null,
       config: config || { timePerRound: 60, rounds: 10, letters: "" },
       players: new Map(),
-      state: { round: 0, running: false, letter: null, roundStartAt: null }
+      state: { round: 0, running: false, letter: null, roundStartAt: null, gameStartAt: null } 
     });
 
     const room = rooms.get(roomId);
@@ -125,13 +141,62 @@ io.on("connection", (socket) => {
     emitRoomUpdate(roomId);
   });
 
-  socket.on("game:goToGame", ({ roomId }) => {
+  socket.on("game:goToGame", ({ roomId, seconds }, cb) => {
+    roomId = String(roomId || "").trim().toUpperCase();
     const room = rooms.get(roomId);
-    if (!room) return;
-    if (socket.id !== room.hostId) return;
 
-    io.to(roomId).emit("game:goToGame", { roomId });
+    if (!room) {
+      if (cb) cb({ ok: false, error: "Sala não existe." });
+      return;
+    }
+
+    if (socket.id !== room.hostId) {
+      if (cb) cb({ ok: false, error: "Só o host pode iniciar." });
+      return;
+    }
+
+    if (room.state.gameStartAt && room.state.gameStartAt > Date.now()) {
+      if (cb) cb({ ok: false, error: "O jogo já está a iniciar." });
+      return;
+    }
+
+    const countdown = Number(seconds) || 5;
+    const startAt = Date.now() + countdown * 1000;
+    room.state.gameStartAt = startAt;
+
+    io.to(roomId).emit("game:starting", { roomId, startAt });
+
+    const ROUND_DELAY_MS = 200; // buffer para trocar de página
+    const msUntilRound = Math.max(0, (startAt + ROUND_DELAY_MS) - Date.now());
+
+    setTimeout(() => {
+
+      const r = rooms.get(roomId);
+      if (!r) return;
+
+      // se já estiver a correr, não reinicia
+      if (r.state.running) return;
+
+      r.state.round = 1;
+      r.state.running = true;
+      r.state.letter = randomLetter(r.config.letters);
+      r.state.roundStartAt = Date.now();
+
+      io.to(roomId).emit("game:roundStarted", {
+        round: r.state.round,
+        rounds: r.config.rounds,
+        letter: r.state.letter,
+        timePerRound: r.config.timePerRound,
+        roundStartAt: r.state.roundStartAt
+      });
+
+      emitRoomUpdate(roomId);
+    }, msUntilRound);
+
+
+    if (cb) cb({ ok: true });
   });
+
 
   socket.on("room:join", ({ roomId, nickname, avatar, password }, cb) => {
     const norm = String(roomId || "").trim().toUpperCase();
@@ -173,6 +238,7 @@ io.on("connection", (socket) => {
   });
 
   socket.on("game:startRound", ({ roomId }, cb) => {
+    roomId = String(roomId || "").trim().toUpperCase();
     const room = rooms.get(roomId);
 
     if (!room) {
@@ -207,6 +273,7 @@ io.on("connection", (socket) => {
   });
 
   socket.on("game:submit", ({ roomId, answers, score }, cb) => {
+    roomId = String(roomId || "").trim().toUpperCase();
     const room = rooms.get(roomId);
 
     if (!room) {
@@ -254,6 +321,7 @@ io.on("connection", (socket) => {
       }
 
       if (room.players.size === 0) {
+        room.state.gameStartAt = null;
         scheduleRoomDeletion(roomId, 30000);
       } else {
         emitRoomUpdate(roomId);

@@ -215,6 +215,32 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
+  function handleRoundStarted(payload) {
+    currentRound = payload.round;
+    total_rounds = payload.rounds;
+    currentLetter = payload.letter;
+
+    if (roundSpan) roundSpan.textContent = currentRound + "/" + total_rounds;
+    if (letterSpan) letterSpan.textContent = currentLetter;
+
+    roundRunning = true;
+    setInputsEnabled(true);
+
+    if (timerId !== null) clearInterval(timerId);
+
+    function tick() {
+      const elapsed = Math.floor((Date.now() - payload.roundStartAt) / 1000);
+      const left = Math.max(0, payload.timePerRound - elapsed);
+      timeLeft = left;
+      if (timerSpan) timerSpan.textContent = String(left);
+      if (left <= 0) endRound();
+    }
+
+    tick();
+    timerId = setInterval(tick, 250);
+  }
+
+
   if (isOnline) {
     if (!window.api || !window.api.joinRoom || !window.socket) {
       alert("Online não está carregado. Confirma os <script> no game.html.");
@@ -225,39 +251,37 @@ document.addEventListener("DOMContentLoaded", function () {
           if (!res || !res.ok) {
             alert(res && res.error ? res.error : "Erro ao entrar na sala.");
             window.location.href = "../index.html";
+            return;
           }
+
+          window.socket.emit("game:getState", { roomId: roomId }, function (stateRes) {
+            if (!stateRes || !stateRes.ok || !stateRes.state) return;
+
+            if (
+              stateRes.state.running &&
+              stateRes.state.letter &&
+              stateRes.state.roundStartAt
+            ) {
+              handleRoundStarted({
+                round: stateRes.state.round,
+                rounds: stateRes.config.rounds,
+                letter: stateRes.state.letter,
+                timePerRound: stateRes.config.timePerRound,
+                roundStartAt: stateRes.state.roundStartAt
+              });
+            }
+          });
         }
       );
 
-      window.socket.on("game:roundStarted", function (payload) {
-        currentRound = payload.round;
-        total_rounds = payload.rounds;
-        currentLetter = payload.letter;
-
-        if (roundSpan) roundSpan.textContent = currentRound + "/" + total_rounds;
-        if (letterSpan) letterSpan.textContent = currentLetter;
-
-        roundRunning = true;
-        setInputsEnabled(true);
-
-        if (timerId !== null) clearInterval(timerId);
-
-        function tick() {
-          const elapsed = Math.floor((Date.now() - payload.roundStartAt) / 1000);
-          const left = Math.max(0, payload.timePerRound - elapsed);
-          timeLeft = left;
-          if (timerSpan) timerSpan.textContent = String(left);
-          if (left <= 0) endRound();
-        }
-
-        tick();
-        timerId = setInterval(tick, 250);
-      });
+      // eventos normais
+      window.socket.on("game:roundStarted", handleRoundStarted);
 
       window.socket.on("game:roundEnded", function (payload) {
         console.log("server round ended:", payload);
       });
     }
   }
+
   resetRoundUI();
 });
