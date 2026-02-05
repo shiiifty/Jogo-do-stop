@@ -112,7 +112,7 @@ document.addEventListener("DOMContentLoaded", function () {
     readySent = false;
     if (compareNextRoundBtn) {
       compareNextRoundBtn.disabled = false;
-      compareNextRoundBtn.textContent = "Próxima ronda";
+      compareNextRoundBtn.textContent = (compareState.round >= total_rounds) ? "Ver resultados" : "Próxima ronda";
     }
     if (compareReadyText) compareReadyText.textContent = "";
 

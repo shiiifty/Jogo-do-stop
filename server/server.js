@@ -129,7 +129,6 @@ function finalizeRound(roomId) {
   for (const p of room.players.values()) p.lastSubmit = null;
 
   room.state.running = false;
-
   room.state.readySet = new Set();
   room.state.nextRoundStartAt = null;
   if (room.state.nextRoundStartTimer) {
