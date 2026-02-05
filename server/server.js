@@ -14,7 +14,8 @@ const io = new Server(server, {
     origin: [
       "http://localhost:5500",
       "http://127.0.0.1:5500",
-      "https://shiiifty.github.io"
+      "https://shiiifty.github.io",
+      "https://jogo-do-stop-backend.onrender.com" 
     ],
     methods: ["GET", "POST"]
   }
