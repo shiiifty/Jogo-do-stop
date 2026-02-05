@@ -9,8 +9,6 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 const server = http.createServer(app);
-//const io = new Server(server);
-
 const io = new Server(server, {
   cors: {
     origin: [
@@ -101,6 +99,86 @@ function emitRoomUpdate(roomId) {
   }
 }
 
+function finalizeRound(roomId) {
+  const room = rooms.get(roomId);
+  if (!room) return;
+
+  if (!room.state.acceptingSubmits) return;
+
+  room.state.acceptingSubmits = false;
+  room.state.running = false;
+  room.state.endRequested = false;
+
+  for (const p of room.players.values()) {
+    if (p.lastSubmit && p.lastSubmit.score != null) {
+      p.score += p.lastSubmit.score;
+    }
+  }
+
+  io.to(roomId).emit("game:roundEnded", {
+    round: room.state.round,
+    results: [...room.players.values()].map((p) => ({
+      nickname: p.nickname,
+      scoreTotal: p.score,
+      lastScore: (p.lastSubmit && p.lastSubmit.score != null) ? p.lastSubmit.score : 0,
+      answers: (p.lastSubmit && p.lastSubmit.answers != null) ? p.lastSubmit.answers : null
+    }))
+  });
+
+  for (const p of room.players.values()) p.lastSubmit = null;
+
+  room.state.running = false;
+
+  room.state.readySet = new Set();
+  room.state.nextRoundStartAt = null;
+  if (room.state.nextRoundStartTimer) {
+    clearTimeout(room.state.nextRoundStartTimer);
+    room.state.nextRoundStartTimer = null;
+  }
+
+
+  emitRoomUpdate(roomId);
+}
+
+function startRoundNow(roomId) {
+  const room = rooms.get(roomId);
+  if (!room) return;
+
+  if (room.state.running) return;
+  if (room.state.round >= room.config.rounds) return;
+
+  room.state.acceptingSubmits = true;
+  room.state.endRequested = false;
+  if (room.state.endTimer) {
+    clearTimeout(room.state.endTimer);
+    room.state.endTimer = null;
+  }
+
+  room.state.round += 1;
+  room.state.running = true;
+  room.state.letter = randomLetter(room.config.letters);
+  room.state.roundStartAt = Date.now();
+
+  room.state.readySet = new Set();
+  room.state.nextRoundStartAt = null;
+  if (room.state.nextRoundStartTimer) {
+    clearTimeout(room.state.nextRoundStartTimer);
+    room.state.nextRoundStartTimer = null;
+  }
+
+  io.to(roomId).emit("game:roundStarted", {
+    round: room.state.round,
+    rounds: room.config.rounds,
+    letter: room.state.letter,
+    timePerRound: room.config.timePerRound,
+    roundStartAt: room.state.roundStartAt
+  });
+
+  emitRoomUpdate(roomId);
+}
+
+
+
 io.on("connection", (socket) => {
   socket.on("game:getState", ({ roomId }, cb) => {
     roomId = String(roomId || "").trim().toUpperCase();
@@ -118,6 +196,42 @@ io.on("connection", (socket) => {
     });
   });
 
+  socket.on("game:nextReady", ({ roomId }, cb) => {
+    roomId = String(roomId || "").trim().toUpperCase();
+    const room = rooms.get(roomId);
+
+    if (!room) { if (cb) cb({ ok: false, error: "Sala não existe." }); return; }
+
+    if (room.state.running) { if (cb) cb({ ok: false, error: "A ronda ainda está a decorrer." }); return; }
+
+    if (room.state.round >= room.config.rounds) { if (cb) cb({ ok: false, error: "O jogo já terminou." }); return; }
+
+    if (!room.state.readySet) room.state.readySet = new Set();
+    room.state.readySet.add(socket.id);
+
+    io.to(roomId).emit("game:nextReadyUpdate", {
+      ready: room.state.readySet.size,
+      total: room.players.size
+    });
+
+    if (cb) cb({ ok: true });
+
+    if (room.state.readySet.size === room.players.size) {
+      if (room.state.nextRoundStartTimer) return; 
+
+      const startAt = Date.now() + 3000;
+      room.state.nextRoundStartAt = startAt;
+
+      io.to(roomId).emit("game:nextRoundStarting", { startAt: startAt });
+
+      room.state.nextRoundStartTimer = setTimeout(() => {
+        const r = rooms.get(roomId);
+        if (!r) return;
+        r.state.nextRoundStartTimer = null;
+        startRoundNow(roomId);
+      }, 3000);
+    }
+  });
 
   socket.on("room:create", ({ nickname, avatar, password, config }, cb) => {
     const roomId = makeRoomId();
@@ -128,7 +242,19 @@ io.on("connection", (socket) => {
       password: password || null,
       config: config || { timePerRound: 60, rounds: 10, letters: "" },
       players: new Map(),
-      state: { round: 0, running: false, letter: null, roundStartAt: null, gameStartAt: null } 
+      state: {
+        round: 0,
+        running: false,
+        letter: null,
+        roundStartAt: null,
+        gameStartAt: null,
+        acceptingSubmits: false,
+        endRequested: false,
+        endTimer: null,
+        readySet: new Set(),
+        nextRoundStartTimer: null,
+        nextRoundStartAt: null
+      }
     });
 
     const room = rooms.get(roomId);
@@ -166,7 +292,7 @@ io.on("connection", (socket) => {
 
     io.to(roomId).emit("game:starting", { roomId, startAt });
 
-    const ROUND_DELAY_MS = 200; // buffer para trocar de página
+    const ROUND_DELAY_MS = 200;
     const msUntilRound = Math.max(0, (startAt + ROUND_DELAY_MS) - Date.now());
 
     setTimeout(() => {
@@ -174,11 +300,14 @@ io.on("connection", (socket) => {
       const r = rooms.get(roomId);
       if (!r) return;
 
-      // se já estiver a correr, não reinicia
       if (r.state.running) return;
 
       r.state.round = 1;
       r.state.running = true;
+      r.state.acceptingSubmits = true;
+      r.state.endRequested = false;
+      if (r.state.endTimer) { clearTimeout(r.state.endTimer); r.state.endTimer = null; }
+
       r.state.letter = randomLetter(r.config.letters);
       r.state.roundStartAt = Date.now();
 
@@ -258,6 +387,10 @@ io.on("connection", (socket) => {
 
     room.state.round += 1;
     room.state.running = true;
+    room.state.acceptingSubmits = true;
+    room.state.endRequested = false;
+    if (room.state.endTimer) { clearTimeout(room.state.endTimer); room.state.endTimer = null; }
+
     room.state.letter = randomLetter(room.config.letters);
     room.state.roundStartAt = Date.now();
 
@@ -276,38 +409,46 @@ io.on("connection", (socket) => {
     roomId = String(roomId || "").trim().toUpperCase();
     const room = rooms.get(roomId);
 
-    if (!room) {
-      if (cb) cb({ ok: false });
-      return;
-    }
+    if (!room) { if (cb) cb({ ok: false }); return; }
+    if (!room.state.acceptingSubmits) { if (cb) cb({ ok: false, error: "Submissões fechadas." }); return; }
 
     const player = room.players.get(socket.id);
     if (player) player.lastSubmit = { answers, score };
 
     if (cb) cb({ ok: true });
 
-    if (room.state.running) {
-      room.state.running = false;
-
-      for (const p of room.players.values()) {
-        if (p.lastSubmit && p.lastSubmit.score != null) {
-          p.score += p.lastSubmit.score;
-        }
-      }
-
-      io.to(roomId).emit("game:roundEnded", {
-        round: room.state.round,
-        results: [...room.players.values()].map((p) => ({
-          nickname: p.nickname,
-          scoreTotal: p.score,
-          lastScore: (p.lastSubmit && p.lastSubmit.score != null) ? p.lastSubmit.score : 0,
-          answers: (p.lastSubmit && p.lastSubmit.answers != null) ? p.lastSubmit.answers : null
-        }))
-      });
-
-      emitRoomUpdate(roomId);
+    const allSubmitted = [...room.players.values()].every((p) => p.lastSubmit && p.lastSubmit.score != null);
+    if (allSubmitted) {
+      if (room.state.endTimer) { clearTimeout(room.state.endTimer); room.state.endTimer = null; }
+      finalizeRound(roomId);
     }
   });
+
+
+  socket.on("game:stopRound", ({ roomId }, cb) => {
+    roomId = String(roomId || "").trim().toUpperCase();
+    const room = rooms.get(roomId);
+
+    if (!room) { if (cb) cb({ ok: false, error: "Sala não existe." }); return; }
+    if (!room.state.acceptingSubmits) { if (cb) cb({ ok: false, error: "Round já terminou." }); return; }
+
+    io.to(roomId).emit("game:forceEndRound", { stoppedBy: socket.id });
+
+    if (!room.state.endRequested) {
+      room.state.endRequested = true;
+      room.state.running = false;
+
+      if (room.state.endTimer) clearTimeout(room.state.endTimer);
+      room.state.endTimer = setTimeout(() => {
+        room.state.endTimer = null;
+        finalizeRound(roomId);
+      }, 1200);
+    }
+
+    if (cb) cb({ ok: true });
+  });
+
+
 
   socket.on("disconnect", (reason) => {
     for (const [roomId, room] of rooms.entries()) {

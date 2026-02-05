@@ -19,6 +19,285 @@ document.addEventListener("DOMContentLoaded", function () {
   const totalScoreSpan = document.getElementById("total-score");
   const closeScoreBtn  = document.getElementById("close-score-btn");
 
+  const compareOverlay = document.getElementById("compare-overlay");
+  const compareTitle = document.getElementById("compare-title");
+  const compareSubtitle = document.getElementById("compare-subtitle");
+  const compareCategoryTitle = document.getElementById("compare-category-title");
+  const compareTable = document.getElementById("compare-table");
+
+  const comparePrevBtn = document.getElementById("compare-prev");
+  const compareNextBtn = document.getElementById("compare-next");
+  const comparePauseBtn = document.getElementById("compare-pause");
+  const compareCountdownSpan = document.getElementById("compare-countdown");
+  const compareNextRoundBtn = document.getElementById("compare-next-round");
+  const compareReadyText = document.getElementById("compare-ready");
+  const stopWarning = document.getElementById("incorrect-stop");
+
+  let readySent = false;
+
+  if (compareNextRoundBtn) {
+    compareNextRoundBtn.addEventListener("click", function () {
+      if (!isOnline || !window.api || !window.api.nextReady) return;
+      if (readySent) return;
+
+      readySent = true;
+      compareNextRoundBtn.disabled = true;
+      compareNextRoundBtn.textContent = "A aguardar jogadores...";
+
+      window.api.nextReady(roomId, function (res) {
+        if (!res || !res.ok) {
+          readySent = false;
+          compareNextRoundBtn.disabled = false;
+          compareNextRoundBtn.textContent = "Próxima ronda";
+          alert((res && res.error) ? res.error : "Erro ao marcar pronto.");
+        }
+      });
+    });
+  }
+
+  const compareState = {
+    open: false,
+    paused: false,
+    stepSeconds: 5,
+    secondsLeft: 5,
+    timerTick: null,
+    categories: [],
+    players: [],
+    index: 0,
+    round: 0
+  };
+
+  function showStopWarning(show) {
+    if (!stopWarning) return;
+    if (show) stopWarning.classList.remove("hidden");
+    else stopWarning.classList.add("hidden");
+  }
+
+
+  function openCompareOverlay(payload) {
+    if (!compareOverlay) return;
+
+    compareState.round = payload.round || 0;
+
+    var results = payload.results || [];
+    compareState.players = results.map(function (p) {
+      return {
+        nickname: p.nickname,
+        lastScore: (p.lastScore != null) ? p.lastScore : 0,
+        scoreTotal: (p.scoreTotal != null) ? p.scoreTotal : 0,
+        answers: p.answers || {}
+      };
+    });
+
+    var catSet = {};
+    compareState.players.forEach(function (p) {
+      var a = p.answers || {};
+      Object.keys(a).forEach(function (k) { catSet[k] = true; });
+    });
+    compareState.categories = Object.keys(catSet);
+
+    if (compareState.categories.length === 0 && answerInputs && answerInputs.length) {
+      compareState.categories = Array.from(answerInputs).map(function (inp) {
+        return inp.dataset.category;
+      }).filter(Boolean);
+    }
+
+    compareState.index = 0;
+    compareState.paused = false;
+    compareState.secondsLeft = compareState.stepSeconds;
+
+    compareState.open = true;
+    compareOverlay.classList.remove("hidden");
+
+    readySent = false;
+    if (compareNextRoundBtn) {
+      compareNextRoundBtn.disabled = false;
+      compareNextRoundBtn.textContent = "Próxima ronda";
+    }
+    if (compareReadyText) compareReadyText.textContent = "";
+
+
+    renderCompareStep();
+    startCompareTimer();
+  }
+
+    
+  function closeCompareOverlay() {
+    compareState.open = false;
+    stopCompareTimer();
+    if (compareOverlay) compareOverlay.classList.add("hidden");
+  }
+
+  function normalizeAnswer(s) {
+    return String(s || "").trim().toLowerCase();
+  }
+
+  function computeCategoryMarks(category) {
+    var vals = compareState.players.map(function (p) {
+      var v = (p.answers && p.answers[category] != null) ? String(p.answers[category]) : "";
+      return v.trim();
+    });
+
+    var counts = {};
+    vals.forEach(function (v) {
+      if (!v) return;
+
+      var ok = false;
+      if (typeof isValidWordForCategoryAndLetter === "function") {
+        ok = isValidWordForCategoryAndLetter(category, v, currentLetter);
+      } else {
+        ok = currentLetter ? (v.toUpperCase().indexOf(currentLetter) === 0) : true;
+      }
+      if (!ok) return;
+
+      var n = normalizeAnswer(v);
+      if (!n) return;
+      counts[n] = (counts[n] || 0) + 1;
+    });
+
+    return vals.map(function (v) {
+      if (!v) return { status: "bad", points: 0 };
+
+      var ok = false;
+      if (typeof isValidWordForCategoryAndLetter === "function") {
+        ok = isValidWordForCategoryAndLetter(category, v, currentLetter);
+      } else {
+        ok = currentLetter ? (v.toUpperCase().indexOf(currentLetter) === 0) : true;
+      }
+
+      if (!ok) return { status: "bad", points: 0 };
+
+      var n = normalizeAnswer(v);
+
+      if (n && counts[n] > 1) return { status: "dup", points: 10 };
+
+      return { status: "ok", points: 20 };
+    });
+  }
+
+
+  function renderCompareStep() {
+    if (!compareState.open) return;
+
+    var cats = compareState.categories;
+    if (!cats || cats.length === 0) {
+      if (compareCategoryTitle) compareCategoryTitle.textContent = "Sem categorias";
+      if (compareTable) compareTable.innerHTML = "<div class='muted'>Não há respostas para comparar.</div>";
+      return;
+    }
+
+    var idx = compareState.index;
+    if (idx < 0) idx = 0;
+    if (idx >= cats.length) idx = cats.length - 1;
+    compareState.index = idx;
+
+    var category = cats[idx];
+
+    if (compareTitle) compareTitle.textContent = "Comparação da ronda";
+    if (compareSubtitle) compareSubtitle.textContent =
+      "Ronda " + compareState.round + " • " + (idx + 1) + "/" + cats.length;
+
+    if (compareCategoryTitle) compareCategoryTitle.textContent = String(category);
+
+    var marks = computeCategoryMarks(category);
+
+    if (comparePrevBtn) comparePrevBtn.disabled = (idx === 0);
+    if (compareNextBtn) compareNextBtn.disabled = (idx === cats.length - 1);
+    if (comparePauseBtn) comparePauseBtn.textContent = compareState.paused ? "▶ Continuar" : "⏸ Pause";
+    if (compareCountdownSpan) compareCountdownSpan.textContent = String(compareState.secondsLeft);
+
+    if (!compareTable) return;
+
+    var html = "";
+
+    html += "<div class='compare-row'>";
+    html += "<div class='compare-cell compare-head'>Jogador</div>";
+    html += "<div class='compare-cell compare-head'>Resposta</div>";
+    html += "<div class='compare-cell compare-head'>Pontos</div>";
+    html += "</div>";
+
+    compareState.players.forEach(function (p, i) {
+      var ans = (p.answers && p.answers[category] != null) ? String(p.answers[category]).trim() : "";
+      var m = marks[i];
+
+      var badgeText = "";
+      if (m.status === "ok") badgeText = "✅ +20";
+      else if (m.status === "dup") badgeText = "🟡 +10";
+      else badgeText = "❌ 0";
+
+      html += "<div class='compare-row'>";
+      html += "<div class='compare-cell'><strong>" + escapeHtml(p.nickname) + "</strong></div>";
+      html += "<div class='compare-cell'>" + (ans ? escapeHtml(ans) : "<span class='answer-empty'>(vazio)</span>") + "</div>";
+      html += "<div class='compare-cell'><span class='badge'>" + badgeText + "</span></div>";
+      html += "</div>";
+    });
+
+    compareTable.innerHTML = html;
+  }
+
+  function escapeHtml(s) {
+    return String(s)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
+
+  function stopCompareTimer() {
+    if (compareState.timerTick) {
+      clearInterval(compareState.timerTick);
+      compareState.timerTick = null;
+    }
+  }
+
+  function startCompareTimer() {
+    stopCompareTimer();
+
+    compareState.timerTick = setInterval(function () {
+      if (!compareState.open) return;
+      if (compareState.paused) return;
+
+      compareState.secondsLeft -= 1;
+      if (compareState.secondsLeft <= 0) {
+        compareState.secondsLeft = compareState.stepSeconds;
+
+        if (compareState.index < compareState.categories.length - 1) {
+          compareState.index += 1;
+          renderCompareStep();
+        } else {
+          compareState.paused = true;
+          renderCompareStep();
+        }
+      } else {
+        if (compareCountdownSpan) compareCountdownSpan.textContent = String(compareState.secondsLeft);
+      }
+    }, 1000);
+  }
+
+
+  if (comparePrevBtn) comparePrevBtn.addEventListener("click", function () {
+    if (!compareState.open) return;
+    if (compareState.index > 0) compareState.index -= 1;
+    compareState.secondsLeft = compareState.stepSeconds;
+    renderCompareStep();
+  });
+
+  if (compareNextBtn) compareNextBtn.addEventListener("click", function () {
+    if (!compareState.open) return;
+    if (compareState.index < compareState.categories.length - 1) compareState.index += 1;
+    compareState.secondsLeft = compareState.stepSeconds;
+    renderCompareStep();
+  });
+
+  if (comparePauseBtn) comparePauseBtn.addEventListener("click", function () {
+    if (!compareState.open) return;
+    compareState.paused = !compareState.paused;
+    renderCompareStep();
+  });
+
+
+
   let currentLetter = null;
   let total_rounds = 10;
   let currentRound = 0;
@@ -52,6 +331,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
   let timerId = null;
   let roundRunning = false;
+  let stopRequested = false;
+
 
   if (roundSpan) roundSpan.textContent = "0/" + total_rounds;
 
@@ -73,6 +354,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     setInputsEnabled(false);
+    updateStopButtonState();
   }
 
   function generateRandomLetter() {
@@ -117,6 +399,25 @@ document.addEventListener("DOMContentLoaded", function () {
     }, 1000);
   }
 
+  function allInputsFilled() {
+    return Array.from(answerInputs).every((input) => input.value.trim().length > 0);
+  }
+
+  function updateStopButtonState() {
+    if (!stopBtn) return;
+    const canStop = roundRunning && allInputsFilled();
+    stopBtn.classList.toggle("disabled", !canStop);
+  }
+
+
+
+  answerInputs.forEach(function (input) {
+    input.addEventListener("input", function () {
+      showStopWarning(false);
+      updateStopButtonState();
+    });
+  });
+
   function endRound() {
     if (!roundRunning) return;
 
@@ -150,6 +451,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
       input.classList.toggle("valida", ok);
       input.classList.toggle("erro", !ok);
+      updateStopButtonState();
     });
 
     totalScore += roundScore;
@@ -202,7 +504,33 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
-  if (stopBtn) stopBtn.addEventListener("click", endRound);
+  if (stopBtn) {
+    stopBtn.addEventListener("click", function () {
+      if (!roundRunning) return;
+      if (stopRequested) return;
+
+      if (isOnline && window.api && window.api.stopRound) {
+        if (!allInputsFilled()) {
+          showStopWarning(true);
+          return;
+        }
+        showStopWarning(false);
+        stopRequested = true; 
+        window.api.stopRound(roomId, function (res) {
+          if (!res || !res.ok) {
+            if (res && res.error === "Round já terminou.") return;
+
+            stopRequested = false;
+            alert((res && res.error) ? res.error : "Não foi possível parar o round.");
+          }
+        });
+      } else {
+        endRound();
+      }
+    });
+  }
+
+
 
   if (closeScoreBtn) {
     closeScoreBtn.addEventListener("click", function () {
@@ -215,7 +543,21 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
+  function clearInputsUI() {
+    answerInputs.forEach(function (input) {
+      input.classList.remove("valida", "erro");
+      input.value = "";
+    });
+  }
+
+
+
   function handleRoundStarted(payload) {
+    showStopWarning(false);
+    stopRequested = false;
+
+    clearInputsUI();
+
     currentRound = payload.round;
     total_rounds = payload.rounds;
     currentLetter = payload.letter;
@@ -225,6 +567,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     roundRunning = true;
     setInputsEnabled(true);
+    updateStopButtonState();
 
     if (timerId !== null) clearInterval(timerId);
 
@@ -233,7 +576,17 @@ document.addEventListener("DOMContentLoaded", function () {
       const left = Math.max(0, payload.timePerRound - elapsed);
       timeLeft = left;
       if (timerSpan) timerSpan.textContent = String(left);
-      if (left <= 0) endRound();
+        if (left <= 0) {
+          if (isOnline && window.api && window.api.stopRound) {
+            stopRequested = true;
+            clearInterval(timerId);
+            timerId = null;
+            
+            if (!roundRunning) return;
+
+            endRound();
+          }
+        }
     }
 
     tick();
@@ -274,11 +627,31 @@ document.addEventListener("DOMContentLoaded", function () {
         }
       );
 
-      // eventos normais
-      window.socket.on("game:roundStarted", handleRoundStarted);
+      window.socket.on("game:roundStarted", function (payload) {
+        handleRoundStarted(payload);
+        if (compareOverlay) compareOverlay.classList.add("hidden");
+        if (compareState) compareState.open = false;
+      });
+
+
+      window.socket.on("game:forceEndRound", function() {
+        endRound();
+      });
 
       window.socket.on("game:roundEnded", function (payload) {
-        console.log("server round ended:", payload);
+        openCompareOverlay(payload || {});
+      });
+
+      window.socket.on("game:nextRoundStarting", function (payload) {
+        if (compareReadyText && payload && payload.startAt) {
+          compareReadyText.textContent = "A próxima ronda começa em 3s...";
+        }
+      });
+
+      window.socket.on("game:nextReadyUpdate", function (payload) {
+        if (!compareReadyText) return;
+        if (!payload) return;
+        compareReadyText.textContent = "Prontos: " + payload.ready + "/" + payload.total;
       });
     }
   }

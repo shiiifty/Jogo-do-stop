@@ -1,10 +1,10 @@
-/*window.socket = io("https://jogo-do-stop-backend.onrender.com", {
-  transports: ["websocket", "polling"]
-});*/
-
-window.socket = io("http://localhost:3000", {
+window.socket = io("https://jogo-do-stop-backend.onrender.com", {
   transports: ["websocket", "polling"]
 });
+
+/*window.socket = io("http://localhost:3000", {
+  transports: ["websocket", "polling"]
+});*/
 
 window.api = {
   createRoom: function ({ nickname, avatar, password, config }, cb) {
@@ -26,10 +26,18 @@ window.api = {
     window.socket.emit("game:startRound", { roomId: roomId, hostKey: hostKey }, cb);
   },
 
-
   submit: function (roomId, answers, score, cb) {
     window.socket.emit("game:submit", { roomId, answers, score }, cb);
+  },
+
+  stopRound: function (roomId, cb) {
+    window.socket.emit("game:stopRound", { roomId: roomId }, cb);
+  },
+
+  nextReady: function (roomId, cb) {
+    window.socket.emit("game:nextReady", { roomId: roomId }, cb);
   }
+
 };
 
 window.socket.on("room:update", function (room) {

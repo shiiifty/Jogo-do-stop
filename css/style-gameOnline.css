@@ -307,10 +307,183 @@ body.fade-out {
   100% { opacity: 1; transform: scale(1); }
 }
 
-
 .ptc-total {
   font-size: 1.5rem;
   font-weight: 700;
   color: #FFD93D;
+}
+
+/* =========================
+   OVERLAY (estilo do jogo) - LIMPO
+   ========================= */
+
+.overlay.hidden { display: none; }
+
+.overlay{
+  position: fixed;
+  inset: 0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding: 20px;
+  background: rgba(0,0,0,0.45);
+  z-index: 9999;
+}
+
+/* painel do overlay */
+.overlay-card{
+  width: min(1150px, 96vw);
+  max-height: 85vh;
+  overflow: auto;
+
+  background: #4169E1;                 /* azul do teu jogo */
+  border-radius: 26px;
+  padding: 22px 24px;
+
+  border: 6px solid rgba(255,255,255,0.35);
+  box-shadow: 0 22px 60px rgba(0,0,0,0.45);
+
+  color: #fff;
+  font-family: "Luckiest Guy", sans-serif;
+
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: geometricPrecision;
+}
+
+.overlay-header{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap: 12px;
+  padding-bottom: 12px;
+  margin-bottom: 12px;
+  border-bottom: 3px solid rgba(255,255,255,0.25);
+}
+
+#compare-title{
+  margin: 0;
+  font-size: 40px;
+  letter-spacing: 1px;
+  text-shadow: 0 3px 0 rgba(0,0,0,0.30);
+  -webkit-text-stroke: 0.5px rgba(0,0,0,0.15);
+}
+
+#compare-subtitle,
+.muted{
+  opacity: 0.95;
+  color: rgba(255,255,255,0.95);
+  text-shadow: none;
+}
+
+/* controls */
+.overlay-controls{
+  display:flex;
+  align-items:center;
+  gap: 10px;
+  margin: 14px 0 12px;
+  flex-wrap: wrap;
+}
+
+.spacer{ flex: 1; }
+
+.btn{
+  font-family: "Luckiest Guy", sans-serif;
+  border: 0;
+  border-radius: 14px;
+  padding: 10px 14px;
+  cursor: pointer;
+
+  background: #ffffff;
+  color: #111;
+  box-shadow: 0 6px 0 rgba(0,0,0,0.25);
+}
+
+.btn:active{
+  transform: translateY(2px);
+  box-shadow: 0 4px 0 rgba(0,0,0,0.25);
+}
+
+.btn:disabled{
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.timerpill{
+  background: #FF595E;                 /* vermelho STOP */
+  color: #111;
+  border-radius: 999px;
+  padding: 10px 14px;
+  box-shadow: 0 6px 0 rgba(0,0,0,0.25);
+}
+
+/* categoria */
+.category-title{
+  margin: 8px 0 12px;
+  font-size: 22px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  text-shadow: 0 3px 0 rgba(0,0,0,0.25);
+}
+
+/* tabela */
+.compare-table{
+  display: grid;
+  grid-template-columns: 1.2fr 2fr 0.7fr;
+  gap: 10px;
+}
+
+.compare-row{ display: contents; }
+
+.compare-cell{
+  background: #ffffff;
+  color: #111;
+  border-radius: 12px;
+  padding: 12px;
+  border: 3px solid rgba(0,0,0,0.12);
+  box-shadow: 0 6px 0 rgba(0,0,0,0.18);
+}
+
+.compare-head{
+  font-weight: 700;
+  background: rgba(255,255,255,0.85);
+}
+
+.answer-empty{ color:#888; font-style: italic; }
+
+.badge{
+  display:inline-block;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: #fff;
+  color: #111;
+  box-shadow: 0 4px 0 rgba(0,0,0,0.18);
+}
+
+/* footer */
+.overlay-footer{
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 3px solid rgba(255,255,255,0.25);
+}
+
+/* mobile */
+@media (max-width: 720px){
+  #compare-title{ font-size: 30px; }
+  .compare-table{ grid-template-columns: 1fr; }
+}
+
+
+.hidden {
+  display: none;
+}
+
+.stop-btn.disabled { opacity: 1; }
+
+#incorrect-stop {
+  text-align: center;
+  color: white;
+  font-size: 20px;
 }
 
