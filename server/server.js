@@ -232,6 +232,18 @@ io.on("connection", (socket) => {
       });
     }
 
+    if (cb) cb({ ok: true });
+
+    if (!room.state.readySet) room.state.readySet = new Set();
+    room.state.readySet.add(socket.id);
+
+    if (!requestResult) {
+      io.to(roomId).emit("game:nextReadyUpdate", {
+        ready: room.state.readySet.size,
+        total: room.players.size
+      });
+    }
+
     if (room.state.readySet.size === room.players.size) {
       if (room.state.nextRoundStartTimer) return; 
 
@@ -246,18 +258,6 @@ io.on("connection", (socket) => {
         r.state.nextRoundStartTimer = null;
         startRoundNow(roomId);
       }, 3000);
-    }
-
-    if (cb) cb({ ok: true });
-
-    if (!room.state.readySet) room.state.readySet = new Set();
-    room.state.readySet.add(socket.id);
-
-    if (!requestResult) {
-      io.to(roomId).emit("game:nextReadyUpdate", {
-        ready: room.state.readySet.size,
-        total: room.players.size
-      });
     }
 
     if (cb) cb({ ok: true });
