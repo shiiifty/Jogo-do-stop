@@ -85,19 +85,6 @@ document.addEventListener("DOMContentLoaded", function () {
     round: 0
   };
 
-  function updateCountdown() {
-    const msLeft = payload.startAt - Date.now();
-    const secondsLeft = Math.max(0, Math.ceil(msLeft / 1000));
-
-    if (secondsLeft > 0) {
-      compareReadyText.textContent = "A próxima ronda começa em " + secondsLeft + "s...";
-    } else {
-      compareReadyText.textContent = "A começar...";
-      clearInterval(nextRoundCountdownTimer);
-      nextRoundCountdownTimer = null;
-    }
-  }
-
   function showStopWarning(show) {
     if (!stopWarning) return;
     if (show) stopWarning.classList.remove("hidden");
@@ -724,6 +711,19 @@ document.addEventListener("DOMContentLoaded", function () {
         if (nextRoundCountdownTimer) {
           clearInterval(nextRoundCountdownTimer);
           nextRoundCountdownTimer = null;
+        }
+
+        function updateCountdown() {
+          const msLeft = payload.startAt - Date.now();
+          const secondsLeft = Math.max(0, Math.ceil(msLeft / 1000));
+
+          if (secondsLeft > 0) {
+            compareReadyText.textContent = "A próxima ronda começa em " + secondsLeft + "s...";
+          } else {
+            compareReadyText.textContent = "A começar...";
+            clearInterval(nextRoundCountdownTimer);
+            nextRoundCountdownTimer = null;
+          }
         }
 
         updateCountdown();
