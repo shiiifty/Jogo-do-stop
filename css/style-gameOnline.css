@@ -487,3 +487,121 @@ body.fade-out {
   font-size: 20px;
 }
 
+
+#results-overlay .results-table{
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  border-radius: 0;
+  padding: 0;
+
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1.6fr 0.8fr;
+  gap: 12px;
+}
+
+
+/* “título” automático (sem mexer no HTML) */
+#results-overlay .results-table::before{
+  content: "Resultados finais";
+  display: block;
+  font-size: 40px;
+  letter-spacing: 1px;
+  grid-column: 1 / -1;
+  margin-bottom: 14px;
+  text-shadow: 0 3px 0 rgba(0,0,0,0.30);
+  -webkit-text-stroke: 0.5px rgba(0,0,0,0.15);
+
+  padding-bottom: 12px;
+  border-bottom: 3px solid rgba(255,255,255,0.25);
+}
+
+/* Tabela dentro do results-table (tu crias compare-row/cell via JS) */
+#results-overlay .results-table .compare-row{
+  display: contents;
+}
+
+#results-overlay .results-table{
+  display: grid;
+  grid-template-columns: 1.6fr 0.8fr; /* Jogador | Pontos */
+  gap: 10px;
+}
+
+/* Reusa o estilo da compare-cell/head/badge */
+#results-overlay .compare-cell{
+  background: #ffffff;
+  color: #111;
+  border-radius: 12px;
+  padding: 12px;
+  border: 3px solid rgba(0,0,0,0.12);
+  box-shadow: 0 6px 0 rgba(0,0,0,0.18);
+}
+
+#results-overlay .compare-head{
+  font-weight: 700;
+  background: rgba(255,255,255,0.85);
+}
+
+#results-overlay .badge{
+  display:inline-block;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: #FFD93D;                 /* amarelo do teu logo */
+  color: #111;
+  box-shadow: 0 4px 0 #b8860b;
+}
+
+/* Botão "Ver resultados" no overlay */
+#close-btn{
+  margin-top: 14px;
+  width: min(260px, 90vw);
+  align-self: center;
+
+  border: none;
+  border-radius: 18px;
+  padding: 12px 20px;
+  font-size: 22px;
+  font-family: 'Luckiest Guy', sans-serif;
+  cursor: pointer;
+
+  background: #FFD93D;
+  color: #1a1a1a;
+  box-shadow: 0px 6px 0 #b8860b;
+  transition: 0.15s ease;
+}
+
+#close-btn:active{
+  transform: translateY(3px);
+  box-shadow: 0px 3px 0 #b8860b;
+}
+
+#play-again-btn{
+  margin-top: 14px;
+  width: min(260px, 90vw);
+  align-self: center;
+
+  border: none;
+  border-radius: 18px;
+  padding: 12px 20px;
+  font-size: 22px;
+  font-family: 'Luckiest Guy', sans-serif;
+  cursor: pointer;
+
+  background: #FFD93D;
+  color: #1a1a1a;
+  box-shadow: 0px 6px 0 #b8860b;
+  transition: 0.15s ease;
+}
+
+#play-again-btn:active{
+  transform: translateY(3px);
+  box-shadow: 0px 3px 0 #b8860b;
+}
+
+/* Mobile */
+@media (max-width: 720px){
+  #results-overlay .results-table::before{ font-size: 30px; }
+  #results-overlay .results-table{ grid-template-columns: 1fr; }
+}
+

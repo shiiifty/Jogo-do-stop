@@ -27,6 +27,20 @@ app.use(express.static(path.join(__dirname, "..")));
 const rooms = new Map();
 const roomDeleteTimers = new Map();
 
+function safeState(state) {
+  return {
+    round: state.round,
+    running: state.running,
+    letter: state.letter,
+    roundStartAt: state.roundStartAt,
+    gameStartAt: state.gameStartAt,
+    acceptingSubmits: state.acceptingSubmits,
+    endRequested: state.endRequested,
+    nextRoundStartAt: state.nextRoundStartAt,
+    ready: state.readySet ? state.readySet.size : 0
+  };
+}
+
 function cancelRoomDeletion(roomId) {
   const t = roomDeleteTimers.get(roomId);
   if (t) {
@@ -69,7 +83,7 @@ function publicRoom(roomId) {
     roomId,
     hostId: room.hostId,
     config: room.config,
-    state: room.state,
+    state: safeState(room.state),  // <-- SIM
     players: [...room.players.entries()].map(([socketId, p]) => ({
       socketId,
       nickname: p.nickname,
@@ -77,6 +91,7 @@ function publicRoom(roomId) {
       score: p.score
     }))
   };
+
 }
 
 function publicRoomForSocket(roomId, socketId) {
@@ -191,28 +206,43 @@ io.on("connection", (socket) => {
 
     if (cb) cb({
       ok: true,
-      state: room.state,
+      state: safeState(room.state),
       config: room.config
     });
+
   });
 
   socket.on("game:nextReady", ({ roomId }, cb) => {
     roomId = String(roomId || "").trim().toUpperCase();
     const room = rooms.get(roomId);
 
+    let requestResult = false;
+
     if (!room) { if (cb) cb({ ok: false, error: "Sala não existe." }); return; }
 
     if (room.state.running) { if (cb) cb({ ok: false, error: "A ronda ainda está a decorrer." }); return; }
 
-    if (room.state.round >= room.config.rounds) { if (cb) cb({ ok: false, error: "O jogo já terminou." }); return; }
+    if (room.state.round >= room.config.rounds) {
+      requestResult = true;
+      socket.emit("game:showResults", {
+        results: [...room.players.values()].map((p) => ({
+          nickname: p.nickname,
+          scoreTotal: p.score,
+        }))
+      });
+    }
+
+    if (cb) cb({ ok: true });
 
     if (!room.state.readySet) room.state.readySet = new Set();
     room.state.readySet.add(socket.id);
 
-    io.to(roomId).emit("game:nextReadyUpdate", {
-      ready: room.state.readySet.size,
-      total: room.players.size
-    });
+    if (!requestResult) {
+      io.to(roomId).emit("game:nextReadyUpdate", {
+        ready: room.state.readySet.size,
+        total: room.players.size
+      });
+    }
 
     if (cb) cb({ ok: true });
 

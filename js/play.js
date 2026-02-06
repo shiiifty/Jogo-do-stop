@@ -33,7 +33,25 @@ document.addEventListener("DOMContentLoaded", function () {
   const compareReadyText = document.getElementById("compare-ready");
   const stopWarning = document.getElementById("incorrect-stop");
 
+  const resultsOverlay = document.getElementById("results-overlay");
+  const resultsTable = document.getElementById("results-table");
+  const closeBtn = document.getElementById("close-btn");
+  const playAgainBtn = document.getElementById("play-again-btn");
+
   let readySent = false;
+  let isCountingNextRound = false;
+  
+  let nextRoundCountdownTimer = null;
+
+
+  closeBtn.addEventListener("click", function() {
+    window.location.href = "../index.html";
+  });
+
+  playAgainBtn.addEventListener("click", function() {
+    if (window.history.length > 1) window.history.back();
+    else window.location.href = "../index.html";
+  });
 
   if (compareNextRoundBtn) {
     compareNextRoundBtn.addEventListener("click", function () {
@@ -66,6 +84,19 @@ document.addEventListener("DOMContentLoaded", function () {
     index: 0,
     round: 0
   };
+
+  function updateCountdown() {
+    const msLeft = payload.startAt - Date.now();
+    const secondsLeft = Math.max(0, Math.ceil(msLeft / 1000));
+
+    if (secondsLeft > 0) {
+      compareReadyText.textContent = "A próxima ronda começa em " + secondsLeft + "s...";
+    } else {
+      compareReadyText.textContent = "A começar...";
+      clearInterval(nextRoundCountdownTimer);
+      nextRoundCountdownTimer = null;
+    }
+  }
 
   function showStopWarning(show) {
     if (!stopWarning) return;
@@ -121,11 +152,29 @@ document.addEventListener("DOMContentLoaded", function () {
     startCompareTimer();
   }
 
-    
-  function closeCompareOverlay() {
-    compareState.open = false;
-    stopCompareTimer();
+  function renderResultsTable(payload) {
+    var html = "";
+
+    html += "<div class='compare-row'>";
+    html += "<div class='compare-cell compare-head'>Jogador</div>";
+    html += "<div class='compare-cell compare-head'>Pontos</div>";
+    html += "</div>";
+
+    compareState.players.forEach(function (p, _) {
+      html += "<div class='compare-row'>";
+      html += "<div class='compare-cell'><strong>" + escapeHtml(p.nickname) + "</strong></div>";
+      html += "<div class='compare-cell'><span class='badge'>" + escapeHtml(p.scoreTotal) + "</span></div>";
+      html += "</div>";
+    });
+
+    resultsTable.innerHTML = html;
+  }
+
+  function show_results(payload) {
+    if (!resultsOverlay) return;
+    renderResultsTable(payload);
     if (compareOverlay) compareOverlay.classList.add("hidden");
+    resultsOverlay.classList.remove("hidden");
   }
 
   function normalizeAnswer(s) {
@@ -296,8 +345,6 @@ document.addEventListener("DOMContentLoaded", function () {
     renderCompareStep();
   });
 
-
-
   let currentLetter = null;
   let total_rounds = 10;
   let currentRound = 0;
@@ -433,34 +480,53 @@ document.addEventListener("DOMContentLoaded", function () {
     let validCount = 0;
     let roundScore = 0;
 
-    answerInputs.forEach(function (input) {
+    const entries = Array.from(answerInputs).map((input) => {
       const cat = input.dataset.category;
       const value = input.value.trim();
-
       answers[cat] = value;
 
       let ok = false;
-      if (cat) {
-        ok = isValidWordForCategoryAndLetter(cat, value, currentLetter);
-      }
+      if (cat) ok = isValidWordForCategoryAndLetter(cat, value, currentLetter);
 
-      if (ok) {
-        validCount++;
-        roundScore += 10;
-      }
+      const norm = String(value || "").trim().toLowerCase();
 
-      input.classList.toggle("valida", ok);
-      input.classList.toggle("erro", !ok);
-      updateStopButtonState();
+      return { input, cat, value, ok, norm };
     });
+
+    const counts = {};
+    entries.forEach((e) => {
+      if (!e.value) return;
+      if (!e.ok) return;
+      if (!e.norm) return;
+      counts[e.norm] = (counts[e.norm] || 0) + 1;
+    });
+
+    entries.forEach((e) => {
+      let points = 0;
+
+      if (!e.value || !e.ok) {
+        points = 0;
+      } else if (counts[e.norm] > 1) {
+        points = 10; 
+        validCount++;
+      } else {
+        points = 20; 
+        validCount++;
+      }
+
+      roundScore += points;
+
+      e.input.classList.toggle("valida", e.ok && !!e.value);
+      e.input.classList.toggle("erro", !e.ok || !e.value);
+    });
+
+    updateStopButtonState();
 
     totalScore += roundScore;
 
     if (isOnline && window.api && window.api.submit) {
       window.api.submit(roomId, answers, roundScore, function (res) {
-        if (!res || !res.ok) {
-          console.warn("submit falhou:", res);
-        }
+        if (!res || !res.ok) console.warn("submit falhou:", res);
       });
     }
 
@@ -473,6 +539,7 @@ document.addEventListener("DOMContentLoaded", function () {
       scoreOverlay.classList.add("show");
     }
   }
+
 
   function fancyEndTransition() {
     const overlay = document.getElementById("end-transition");
@@ -628,6 +695,13 @@ document.addEventListener("DOMContentLoaded", function () {
       );
 
       window.socket.on("game:roundStarted", function (payload) {
+        isCountingNextRound = false;
+
+        if (nextRoundCountdownTimer) {
+          clearInterval(nextRoundCountdownTimer);
+          nextRoundCountdownTimer = null;
+        }
+
         handleRoundStarted(payload);
         if (compareOverlay) compareOverlay.classList.add("hidden");
         if (compareState) compareState.open = false;
@@ -643,16 +717,32 @@ document.addEventListener("DOMContentLoaded", function () {
       });
 
       window.socket.on("game:nextRoundStarting", function (payload) {
-        if (compareReadyText && payload && payload.startAt) {
-          compareReadyText.textContent = "A próxima ronda começa em 3s...";
+        if (!compareReadyText || !payload || !payload.startAt) return;
+
+        isCountingNextRound = true;
+
+        if (nextRoundCountdownTimer) {
+          clearInterval(nextRoundCountdownTimer);
+          nextRoundCountdownTimer = null;
         }
+
+        updateCountdown();
+        nextRoundCountdownTimer = setInterval(updateCountdown, 250);
       });
+
 
       window.socket.on("game:nextReadyUpdate", function (payload) {
         if (!compareReadyText) return;
         if (!payload) return;
+        if (isCountingNextRound) return;
+
         compareReadyText.textContent = "Prontos: " + payload.ready + "/" + payload.total;
       });
+
+      window.socket.on("game:showResults", function(payload) {
+        if (!payload) return;
+        show_results(payload);
+      })
     }
   }
 
