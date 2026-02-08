@@ -58,8 +58,6 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   window.socket.on("room:update", function (room) {
-    console.log("room:update", room);
-
     if (!room) return;
     if (String(room.roomId).toUpperCase() !== roomId) return;
 
@@ -67,7 +65,34 @@ document.addEventListener("DOMContentLoaded", function () {
       playersEl.innerHTML = "";
       (room.players || []).forEach(function (p) {
         const li = document.createElement("li");
-        li.textContent = p.nickname;
+
+        li.style.display = "flex";
+        li.style.flexDirection = "row";
+        li.style.alignItems = "center";
+        li.style.gap = "14px";
+        li.style.padding = "12px 20px";
+
+        const img = document.createElement("img");
+
+        img.src = p.avatar;
+        img.alt = p.nickname + " avatar";
+        
+        
+        img.style.width = "56px";
+        img.style.height = "56px";
+        img.style.borderRadius = "50%";
+        img.style.objectFit = "cover";
+        img.style.flexShrink = "0";
+
+        
+        const name = document.createElement("span");
+        name.textContent = p.nickname;
+
+        name.style.fontSize = "22px";
+        name.style.lineHeight = "1";
+        
+        li.appendChild(img)
+        li.appendChild(name);
         playersEl.appendChild(li);
       });
     }
@@ -95,7 +120,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
    if (startBtn) {
     startBtn.addEventListener("click", function () {
-      localStorage.removeItem("roomPassword");
+      //localStorage.removeItem("roomPassword");
 
       window.socket.emit("game:goToGame", { roomId, seconds: 5 }, function (res) {
         if (res && res.ok) return;

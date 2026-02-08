@@ -83,7 +83,7 @@ function publicRoom(roomId) {
     roomId,
     hostId: room.hostId,
     config: room.config,
-    state: safeState(room.state),  // <-- SIM
+    state: safeState(room.state),
     players: [...room.players.entries()].map(([socketId, p]) => ({
       socketId,
       nickname: p.nickname,
@@ -197,7 +197,7 @@ function emitPublicRoomsUpdate() {
 
   for (const [roomId, room] of rooms.entries()) {
     if (!room) continue;
-    if (room.password) continue; // privadas fora
+    if (room.password) continue;
 
     const playerCount =
       room.players && room.players.size ? room.players.size : 0;

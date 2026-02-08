@@ -12,6 +12,9 @@ document.addEventListener("DOMContentLoaded", function () {
   const configCancelBtn = document.getElementById("config-cancel");
   const configStartBtn  = document.getElementById("config-start");
 
+  const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+
   if (playBtn) {
     playBtn.addEventListener("click", function () {
       window.location.href = "./html/play.html";
@@ -82,9 +85,14 @@ document.addEventListener("DOMContentLoaded", function () {
     configStartBtn.addEventListener("click", () => {
       const time = parseInt(configTime.value, 10) || 60;
 
-      let letters = (configLetters.value || "")
-        .toUpperCase()
-        .replace(/[^A-Z]/g, "");
+      const excluded = (configLetters.value || "")
+      .toUpperCase()
+      .replace(/[^A-Z]/g, "");
+
+    const letters = ALPHABET
+      .split("")
+      .filter(l => !excluded.includes(l))
+      .join("");
 
       const total_rounds = parseInt(configRounds.value, 10) || 10;
       

@@ -742,6 +742,9 @@ document.addEventListener("DOMContentLoaded", function () {
       window.socket.on("game:showResults", function(payload) {
         if (!payload) return;
         show_results(payload);
+        if (localStorage.getItem("roomPassword")) {
+          localStorage.removeItem("roomPassword");
+        }
       })
     }
   }

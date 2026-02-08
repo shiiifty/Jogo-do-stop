@@ -35,6 +35,47 @@
             </div>
             <a href="../index.html" class="voltar-menu">Voltar ao Menu</a> 
         </div>  
+        <div id="config-overlay" class="config-overlay hidden">
+            <div class="config-modal">
+                <h2 class="config-title">Configurar Jogo</h2>
+
+                <label class="config-label">
+                    Tempo por ronda:
+                    <select id="config-time" class="config-select">
+                        <option value="30">30 segundos</option>
+                        <option value="60" selected>60 segundos</option>
+                        <option value="90">90 segundos</option>
+                    </select>
+                </label>
+
+                <label class="config-label">
+                    Letras a excluir:
+                    <input
+                        type="text"
+                        id="config-letters"
+                        class="config-input"
+                        placeholder="Ex: ABCDE (vazio = todas as letras)"
+                    >
+                </label>
+                <label class="config-label">
+                    Número de rondas:
+                    <select id="config-rounds" class="config-rounds">
+                        <option value="5">5 rondas</option>
+                        <option value="10" selected>10 rondas</option>
+                        <option value="15">15 rondas</option>
+                    </select>
+                </label>
+
+                <div class="config-buttons">
+                    <button type="button" id="config-cancel" class="config-btn cancel">
+                        Cancelar
+                    </button>
+                    <button type="button" id="config-start" class="config-btn confirm">
+                        Começar
+                    </button>
+                </div>
+            </div>
+        </div> 
         <div id="popup-overlay" class="popup-overlay">
             <div class="popup-box">
 

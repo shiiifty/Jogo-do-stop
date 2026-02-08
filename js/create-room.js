@@ -8,6 +8,16 @@ document.addEventListener("DOMContentLoaded", function () {
   const wrongPwMsg = document.getElementById("wrong-pw-msg");
   const senhaInput = document.getElementById("senha-input");
 
+  const configOverlay   = document.getElementById("config-overlay");
+  const configTime      = document.getElementById("config-time");
+  const configLetters   = document.getElementById("config-letters");
+  const configRounds    = document.getElementById("config-rounds");
+  const configCancelBtn = document.getElementById("config-cancel");
+  const configStartBtn  = document.getElementById("config-start");
+
+  const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  
+
   function getPlayerInfo() {
     const nickname = localStorage.getItem("playerNickname") || "Player";
     const avatar = localStorage.getItem("playerAvatar") || "default";
@@ -50,18 +60,78 @@ document.addEventListener("DOMContentLoaded", function () {
     );
   }
 
+  if (configCancelBtn && configOverlay) {
+    configCancelBtn.addEventListener("click", () => {
+      configOverlay.classList.add("hidden");
+    });
+  }
+
   if (publicBtn) {
     publicBtn.addEventListener("click", function () {
       localStorage.removeItem("roomPassword");
-      createRoom(null);
+
+      configOverlay.classList.remove("hidden");
+
+      if (configStartBtn) {
+        configStartBtn.addEventListener("click", () => {
+          const time = parseInt(configTime.value, 10) || 60;
+          
+          let excluded = (configLetters.value || "")
+          .toUpperCase()
+          .replace(/[^A-Z]/g, "");
+
+          const letters = ALPHABET
+          .split("")
+          .filter(l => !excluded.includes(l))
+          .join("");
+
+          const total_rounds = parseInt(configRounds.value, 10) || 10;
+
+          const gameConfig = {
+            timePerRound: time,
+            letter: letters,
+            rounds: total_rounds,
+          };
+
+          localStorage.setItem("gameConfig", JSON.stringify(gameConfig));
+          createRoom(null);
+        });
+      }
     });
   }
 
   if (privateBtn && popup) {
     privateBtn.addEventListener("click", function () {
-      popup.classList.add("show");
-      if (wrongPwMsg) wrongPwMsg.classList.remove("show");
-      if (senhaInput) senhaInput.value = "";
+
+      configOverlay.classList.remove("hidden");
+
+      if (configStartBtn) {
+        configStartBtn.addEventListener("click", () => {
+          const time = parseInt(configTime.value, 10) || 60;
+          
+          let excluded = (configLetters.value || "")
+          .toUpperCase()
+          .replace(/[^A-Z]/g, "");
+
+          const letters = ALPHABET
+          .split("")
+          .filter(l => !excluded.includes(l))
+          .join("");
+
+          const total_rounds = parseInt(configRounds.value, 10) || 10;
+
+          const gameConfig = {
+            timePerRound: time,
+            letter: letters,
+            rounds: total_rounds,
+          };
+
+          localStorage.setItem("gameConfig", JSON.stringify(gameConfig));
+          popup.classList.add("show");
+          if (wrongPwMsg) wrongPwMsg.classList.remove("show");
+          if (senhaInput) senhaInput.value = "";
+        });
+      }
     });
   }
 
