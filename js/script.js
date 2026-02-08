@@ -111,6 +111,110 @@ const pwErr      = document.getElementById("pw-error");
 const cancelBtn  = document.getElementById("join-cancel");
 const submitBtn  = document.getElementById("join-submit");
 
+const avlbRoomsBtN = document.getElementById("available-rooms");
+const roomsOverlay   = document.getElementById("all-rooms-overlay");
+const roomsCloseBtn  = document.getElementById("all-rooms-close");
+const roomsListEl    = document.getElementById("rooms-list");
+const roomsLoadingEl = document.getElementById("rooms-loading");
+const roomsEmptyEl   = document.getElementById("rooms-empty");
+
+function openRoomsOverlay() {
+  if (!roomsOverlay) return;
+  roomsOverlay.classList.remove("hidden");
+}
+
+function closeRoomsOverlay() {
+  if (!roomsOverlay) return;
+  roomsOverlay.classList.add("hidden");
+}
+
+function setRoomsLoading(isLoading) {
+  roomsLoadingEl?.classList.toggle("hidden", !isLoading);
+}
+
+function setRoomsEmpty(isEmpty) {
+  roomsEmptyEl?.classList.toggle("hidden", !isEmpty);
+}
+
+function renderRooms(rooms) {
+  if (!roomsListEl) return;
+  roomsListEl.innerHTML = "";
+
+  rooms.forEach((r) => {
+    const row = document.createElement("button");
+    row.type = "button";
+    row.className = "room-row";
+    row.innerHTML = `
+      <div class="room-main">
+        <div class="room-id">${r.roomId}</div>
+        <div class="room-meta">
+          <span>${r.players} jogador(es)</span>
+          ${r.rounds ? `<span>• ${r.rounds} rondas</span>` : ""}
+          ${r.timePerRound ? `<span>• ${r.timePerRound}s</span>` : ""}
+          ${r.running ? `<span class="badge">a decorrer</span>` : `<span class="badge ok">à espera</span>`}
+        </div>
+      </div>
+      <div class="room-host">Host: ${r.host || "—"}</div>
+    `;
+
+    row.addEventListener("click", () => {
+      closeRoomsOverlay();
+      closeJoinModal?.(); 
+      tryJoin(r.roomId, "");
+    });
+
+    roomsListEl.appendChild(row);
+  });
+}
+
+function fetchPublicRooms() {
+  if (!window.api?.listPublicRooms) {
+    if (!window.socket) return;
+
+    setRoomsLoading(true);
+    setRoomsEmpty(false);
+
+    window.socket.emit("room:listPublic", (res) => {
+      setRoomsLoading(false);
+      const rooms = res?.ok ? (res.rooms || []) : [];
+      setRoomsEmpty(rooms.length === 0);
+      renderRooms(rooms);
+    });
+
+    return;
+  }
+
+  setRoomsLoading(true);
+  setRoomsEmpty(false);
+
+  window.api.listPublicRooms((res) => {
+    setRoomsLoading(false);
+    const rooms = res?.ok ? (res.rooms || []) : [];
+    setRoomsEmpty(rooms.length === 0);
+    renderRooms(rooms);
+  });
+}
+
+if (avlbRoomsBtN) {
+  avlbRoomsBtN.addEventListener("click", (e) => {
+    e.preventDefault();
+    closeJoinModal();
+    openRoomsOverlay();
+    fetchPublicRooms();
+  });
+}
+
+roomsCloseBtn?.addEventListener("click", closeRoomsOverlay);
+
+roomsOverlay?.addEventListener("click", (e) => {
+  if (e.target === roomsOverlay) closeRoomsOverlay();
+});
+
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") closeRoomsOverlay();
+});
+
+
 function openJoinModal() {
   if (!joinModal) return;
 
@@ -127,6 +231,7 @@ function openJoinModal() {
 function closeJoinModal() {
   if (!joinModal) return;
   joinModal.classList.add("hidden");
+
 }
 
 function showJoinError(msg) {
@@ -136,6 +241,7 @@ function showJoinError(msg) {
 }
 
 function showPasswordUI(msg) {
+  avlbRoomsBtN.classList.add("hidden");
   pwBlock?.classList.remove("hidden");
   if (msg && pwErr) {
     pwErr.textContent = msg;
@@ -186,6 +292,7 @@ if (onlineBtn) {
   onlineBtn.addEventListener("click", (e) => {
     e.preventDefault();
     openJoinModal();
+    avlbRoomsBtN.classList.remove("hidden");
   });
 }
 
@@ -228,5 +335,4 @@ if (joinModal) {
     if (e.target === joinModal) closeJoinModal();
   });
 }
-
 });

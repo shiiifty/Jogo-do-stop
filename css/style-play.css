@@ -332,6 +332,25 @@ body {
   margin-top: 30px;
 }
 
+#available-rooms {
+  min-width: 220px;
+  padding: 16px 28px;
+  border: none;
+  border-radius: 999px;
+  font-family: "Luckiest Guy", system-ui, sans-serif;
+  font-size: 22px;
+  letter-spacing: 1px;
+  cursor: pointer;
+  box-shadow: 0 10px 0 rgba(0,0,0,.25);
+  transform: translateY(0);
+  transition: transform .06s ease;
+}
+
+#available-rooms:active {
+  transform: translateY(4px);
+  box-shadow: 0 6px 0 rgba(0,0,0,.25);
+}
+
 .join-btn {
   min-width: 220px;
   padding: 16px 28px;
@@ -360,6 +379,200 @@ body {
   background: #ffd54d; 
   color: #111;
 }
+
+/* ============================
+   OVERLAY - SALAS PÚBLICAS
+   ============================ */
+
+.all-rooms-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  padding: 16px;
+}
+
+/* caixa/modal principal */
+.all-rooms-overlay .modal {
+  width: min(780px, 92vw);
+  max-height: 80vh;
+  overflow: auto;
+
+  background: #4f74ff;               /* a mesma vibe do join-card */
+  border-radius: 28px;
+  padding: 26px 26px 20px;
+  box-shadow: 0 18px 45px rgba(0,0,0,.55);
+
+  border: 2px solid rgba(0,0,0,.25);
+  color: #fff;
+  font-family: "Luckiest Guy", system-ui, sans-serif;
+}
+
+/* header */
+.all-rooms-overlay .modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.all-rooms-overlay .modal-header h2 {
+  margin: 0;
+  font-size: 34px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  text-shadow: 0 6px 0 rgba(0,0,0,.22);
+}
+
+/* botão X */
+#all-rooms-close {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  border: 2px solid rgba(0,0,0,.35);
+  background: #ff5252;
+  color: #111;
+  cursor: pointer;
+
+  font-family: "Luckiest Guy", system-ui, sans-serif;
+  font-size: 22px;
+
+  box-shadow: 0 8px 0 rgba(0,0,0,.25);
+  transition: transform .08s ease, box-shadow .08s ease, filter .12s ease;
+}
+
+#all-rooms-close:hover {
+  filter: brightness(1.05);
+}
+
+#all-rooms-close:active {
+  transform: translateY(3px);
+  box-shadow: 0 5px 0 rgba(0,0,0,.25);
+}
+
+/* mensagens */
+#rooms-loading,
+#rooms-empty {
+  background: rgba(0,0,0,.20);
+  border: 2px dashed rgba(255,255,255,.25);
+  border-radius: 18px;
+  padding: 14px 16px;
+  margin: 10px 0 14px;
+
+  font-size: 18px;
+  letter-spacing: 1px;
+  text-shadow: 0 3px 0 rgba(0,0,0,.18);
+}
+
+/* lista */
+.rooms-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* cada sala (tu crias no JS como button.room-row) */
+.room-row {
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+
+  background: rgba(255,255,255,.95);
+  color: #111;
+
+  border: 2px solid rgba(0,0,0,.18);
+  border-radius: 22px;
+  padding: 14px 16px;
+
+  box-shadow: 0 10px 0 rgba(0,0,0,.22);
+  transition: transform .08s ease, box-shadow .08s ease, filter .12s ease;
+}
+
+.room-row:hover {
+  filter: brightness(1.03);
+}
+
+.room-row:active {
+  transform: translateY(4px);
+  box-shadow: 0 6px 0 rgba(0,0,0,.22);
+}
+
+/* layout interno que já estás a gerar no innerHTML */
+.room-main {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.room-id {
+  font-family: "Luckiest Guy", system-ui, sans-serif;
+  font-size: 26px;
+  letter-spacing: 2px;
+}
+
+.room-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+
+  font-size: 14px;
+  font-weight: 700;
+  opacity: .9;
+}
+
+.room-host {
+  margin-top: 8px;
+  font-size: 16px;
+  font-weight: 800;
+  opacity: .9;
+}
+
+/* badges */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 3px 10px;
+  border-radius: 999px;
+
+  border: 2px solid rgba(0,0,0,.15);
+  background: #e9e9e9;
+  font-size: 12px;
+  letter-spacing: .5px;
+  text-transform: uppercase;
+}
+
+.badge.ok {
+  background: #d9f7d9;
+}
+
+/* mobile */
+@media (max-width: 520px) {
+  .all-rooms-overlay .modal {
+    padding: 18px 16px 14px;
+    border-radius: 22px;
+  }
+
+  .all-rooms-overlay .modal-header h2 {
+    font-size: 26px;
+  }
+
+  .room-id {
+    font-size: 22px;
+  }
+
+  .room-meta {
+    font-size: 12px;
+  }
+}
+
 
 @media (max-width: 520px) {
   .join-card { padding: 28px 22px; border-radius: 22px; }

@@ -83,17 +83,31 @@
                 <input id="join-room-id" class="join-input" type="text" maxlength="10" placeholder="Ex: ABC123" />
 
                 <div id="pw-block" class="hidden">
-                <label class="join-label">PASSWORD:</label>
-                <input id="join-room-pw" class="join-input" type="password" placeholder="Password da sala" />
-                <p id="pw-error" class="join-error hidden">Password errada.</p>
+                    <label class="join-label">PASSWORD:</label>
+                    <input id="join-room-pw" class="join-input" type="password" placeholder="Password da sala" />
+                    <p id="pw-error" class="join-error hidden">Password errada.</p>
                 </div>
 
                 <p id="join-error" class="join-error hidden"></p>
 
                 <div class="join-actions">
-                <button id="join-cancel" type="button" class="join-btn join-btn-cancel">CANCELAR</button>
-                <button id="join-submit" type="button" class="join-btn join-btn-confirm">ENTRAR</button>
+                    <button id="join-cancel" type="button" class="join-btn join-btn-cancel">CANCELAR</button>
+                    <button id="join-submit" type="button" class="join-btn join-btn-confirm">ENTRAR</button>
+                    <button id="available-rooms" type="button" class="hidden">VER SALAS DISPONÍVEIS</button>
                 </div>
+            </div>
+        </div>
+        <div id="all-rooms-overlay" class="all-rooms-overlay hidden">
+            <div class="modal">
+                <div class="modal-header">
+                <h2>Salas públicas</h2>
+                <button id="all-rooms-close">✕</button>
+                </div>
+
+                <div id="rooms-loading" class="hidden">A carregar...</div>
+                <div id="rooms-empty" class="hidden">Não há salas públicas abertas.</div>
+
+                <div id="rooms-list" class="rooms-list"></div>
             </div>
         </div>
         <script src="/socket.io/socket.io.js"></script>

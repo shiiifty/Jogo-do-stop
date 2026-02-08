@@ -192,9 +192,96 @@ function startRoundNow(roomId) {
   emitRoomUpdate(roomId);
 }
 
+function emitPublicRoomsUpdate() {
+  const list = [];
+
+  for (const [roomId, room] of rooms.entries()) {
+    if (!room) continue;
+    if (room.password) continue; // privadas fora
+
+    const playerCount =
+      room.players && room.players.size ? room.players.size : 0;
+
+    if (playerCount === 0) continue;
+
+    const hostPlayer =
+      room.players && room.hostId ? room.players.get(room.hostId) : null;
+
+    const hostNickname =
+      hostPlayer && hostPlayer.nickname ? hostPlayer.nickname : "—";
+
+    list.push({
+      roomId: roomId,
+      players: playerCount,
+      host: hostNickname,
+      running: room.state && room.state.running ? true : false,
+      rounds: room.config && typeof room.config.rounds !== "undefined" ? room.config.rounds : null,
+      timePerRound:
+        room.config && typeof room.config.timePerRound !== "undefined"
+          ? room.config.timePerRound
+          : null,
+      createdAt: typeof room.createdAt !== "undefined" ? room.createdAt : null
+    });
+  }
+
+  list.sort((a, b) => ((b.createdAt || 0) - (a.createdAt || 0)));
+  io.emit("rooms:publicUpdate", { rooms: list });
+}
+
+
+
 
 
 io.on("connection", (socket) => {
+  socket.on("room:listPublic", (cb) => {
+    try {
+      const list = [];
+
+      for (const [roomId, room] of rooms.entries()) {
+        if (!room) continue;
+
+        // pública = sem password
+        if (room.password) continue;
+
+        const playerCount =
+          room.players && room.players.size ? room.players.size : 0;
+
+        if (playerCount === 0) continue;
+
+        const hostPlayer =
+          room.players && room.hostId
+            ? room.players.get(room.hostId)
+            : null;
+
+        const hostNickname =
+          hostPlayer && hostPlayer.nickname
+            ? hostPlayer.nickname
+            : "—";
+
+        list.push({
+          roomId: roomId,
+          players: playerCount,
+          host: hostNickname,
+          running: room.state && room.state.running ? true : false,
+          rounds: room.config && room.config.rounds ? room.config.rounds : null,
+          timePerRound:
+            room.config && room.config.timePerRound
+              ? room.config.timePerRound
+              : null,
+          createdAt: room.createdAt ? room.createdAt : null
+        });
+      }
+
+      list.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+
+      if (cb) cb({ ok: true, rooms: list });
+    } catch (err) {
+      if (cb) cb({ ok: false, error: "Erro ao listar salas." });
+    }
+  });
+
+
+
   socket.on("game:getState", ({ roomId }, cb) => {
     roomId = String(roomId || "").trim().toUpperCase();
     const room = rooms.get(roomId);
@@ -232,8 +319,6 @@ io.on("connection", (socket) => {
       });
     }
 
-    if (cb) cb({ ok: true });
-
     if (!room.state.readySet) room.state.readySet = new Set();
     room.state.readySet.add(socket.id);
 
@@ -268,6 +353,7 @@ io.on("connection", (socket) => {
     cancelRoomDeletion(roomId);
 
     rooms.set(roomId, {
+      createdAt: Date.now(),
       hostId: socket.id,
       password: password || null,
       config: config || { timePerRound: 60, rounds: 10, letters: "" },
@@ -295,6 +381,7 @@ io.on("connection", (socket) => {
     if (cb) cb({ ok: true, roomId });
 
     emitRoomUpdate(roomId);
+    emitPublicRoomsUpdate();
   });
 
   socket.on("game:goToGame", ({ roomId, seconds }, cb) => {
@@ -394,6 +481,7 @@ io.on("connection", (socket) => {
     } 
 
     emitRoomUpdate(roomId);
+    emitPublicRoomsUpdate();
   });
 
   socket.on("game:startRound", ({ roomId }, cb) => {
@@ -496,6 +584,7 @@ io.on("connection", (socket) => {
         scheduleRoomDeletion(roomId, 30000);
       } else {
         emitRoomUpdate(roomId);
+        emitPublicRoomsUpdate();
       }
     }
 

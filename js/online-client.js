@@ -2,9 +2,9 @@ window.socket = io("https://jogo-do-stop-backend.onrender.com", {
   transports: ["websocket", "polling"]
 });
 
-/*window.socket = io("http://localhost:3000", {
+window.socket = io("http://localhost:3000", {
   transports: ["websocket", "polling"]
-});*/
+});
 
 window.api = {
   createRoom: function ({ nickname, avatar, password, config }, cb) {
