@@ -21,13 +21,9 @@ document.addEventListener("DOMContentLoaded", function () {
   function getPlayerInfo() {
     const nickname = localStorage.getItem("playerNickname") || "Player";
     const avatar = localStorage.getItem("playerAvatar") || "default";
-    let gameConfig = null;
-
-    try {
-      gameConfig = JSON.parse(localStorage.getItem("gameConfig") || "null");
-    } catch (e) {
-      gameConfig = null;
-    }
+ 
+    const gameConfig = JSON.parse(localStorage.getItem("gameConfig") || "null");
+    console.log("gameConfig");
 
     const config = gameConfig || { timePerRound: 60, rounds: 10, letters: "" };
     return { nickname, avatar, config };

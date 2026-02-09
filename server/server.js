@@ -63,17 +63,21 @@ function makeRoomId() {
   return Math.random().toString(36).slice(2, 8).toUpperCase();
 }
 
-function randomLetter(allowed = "") {
+function randomLetter(excluded = "") {
   const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
-  let pool = alphabet;
 
-  if (allowed && allowed.trim().length) {
-    pool = [...new Set(allowed.toUpperCase().replace(/[^A-Z]/g, "").split(""))];
-    if (!pool.length) pool = alphabet;
-  }
+  const excludedSet = new Set(
+    String(excluded || "").toUpperCase().replace(/[^A-Z]/g, "").split("")
+  );
+
+  let pool = alphabet.filter((ch) => !excludedSet.has(ch));
+
+  // se excluiu tudo (ou quase tudo), volta ao alfabeto completo
+  if (pool.length === 0) pool = alphabet;
 
   return pool[Math.floor(Math.random() * pool.length)];
 }
+
 
 function publicRoom(roomId) {
   const room = rooms.get(roomId);
@@ -352,11 +356,18 @@ io.on("connection", (socket) => {
     const roomId = makeRoomId();
     cancelRoomDeletion(roomId);
 
+    const safeConfig = {
+      timePerRound: Number(config && config.timePerRound) || 60,
+      rounds: Number(config && config.rounds) || 10,
+      letters: String(config && config.letters || "").toUpperCase().replace(/[^A-Z]/g, "")
+    };
+
+
     rooms.set(roomId, {
       createdAt: Date.now(),
       hostId: socket.id,
       password: password || null,
-      config: config || { timePerRound: 60, rounds: 10, letters: "" },
+      config: safeConfig,
       players: new Map(),
       state: {
         round: 0,

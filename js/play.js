@@ -44,14 +44,19 @@ document.addEventListener("DOMContentLoaded", function () {
   let nextRoundCountdownTimer = null;
 
 
-  closeBtn.addEventListener("click", function() {
-    window.location.href = "../index.html";
-  });
+  if (closeBtn) {
+    closeBtn.addEventListener("click", function () {
+      window.location.href = "../index.html";
+    });
+  }
 
-  playAgainBtn.addEventListener("click", function() {
-    if (window.history.length > 1) window.history.back();
-    else window.location.href = "../index.html";
-  });
+  if (playAgainBtn) {
+    playAgainBtn.addEventListener("click", function () {
+      if (window.history.length > 1) window.history.back();
+      else window.location.href = "../index.html";
+    });
+  }
+
 
   if (compareNextRoundBtn) {
     compareNextRoundBtn.addEventListener("click", function () {
@@ -392,17 +397,24 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function generateRandomLetter() {
-    const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+    const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    const excluded = new Set(
+      String(config.letters || "")
+        .toUpperCase()
+        .replace(/[^A-Z]/g, "")
+        .split("")
+    );
 
-    if (config.letters && config.letters.length > 0) {
-      for (const char of config.letters.toUpperCase()) {
-        const idx = alphabet.indexOf(char);
-        if (idx !== -1) alphabet.splice(idx, 1);
-      }
+    let pool = []
+
+    for (const ch of excluded) {
+      pool.push(ch);
     }
 
-    const idx = Math.floor(Math.random() * alphabet.length);
-    return alphabet[idx];
+    if (pool.length === 0) pool = alphabet.split("");
+
+    const idx = Math.floor(Math.random() * pool.length);
+    return pool[idx];
   }
 
   function startRoundOffline() {
@@ -652,8 +664,10 @@ document.addEventListener("DOMContentLoaded", function () {
     if (!window.api || !window.api.joinRoom || !window.socket) {
       alert("Online não está carregado. Confirma os <script> no game.html.");
     } else {
+      const savedPassword = localStorage.getItem("roomPassword") || ""; 
+
       window.api.joinRoom(
-        { roomId: roomId, nickname: nickname, avatar: avatar, password: "" },
+        { roomId: roomId, nickname: nickname, avatar: avatar, password: savedPassword },
         function (res) {
           if (!res || !res.ok) {
             alert(res && res.error ? res.error : "Erro ao entrar na sala.");
