@@ -387,6 +387,11 @@ body {
   font-family: "Luckiest Guy", system-ui, sans-serif;
 }
 
+.config-btn:active {
+  transform: translateY(2px);
+  box-shadow: 0 3px 0 rgba(0,0,0,0.35);
+}
+
 .config-btn.cancel {
   background: #ff5c5c;
 }
@@ -395,3 +400,12 @@ body {
   background: #ffd447;
 }
 
+.config-btn.cancel:hover {
+  background: #ff5c5ccc;
+  color: rgba(0, 0, 0, 0.7);
+}
+
+.config-btn.confirm:hover {
+  background: #ffe97a;
+  color: rgba(0, 0, 0, 0.7);
+}

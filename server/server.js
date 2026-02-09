@@ -3,6 +3,7 @@ import http from "http";
 import { Server } from "socket.io";
 import path from "path";
 import { fileURLToPath } from "url";
+import { config } from "process";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -62,22 +63,6 @@ function scheduleRoomDeletion(roomId, ms = 1000000) {
 function makeRoomId() {
   return Math.random().toString(36).slice(2, 8).toUpperCase();
 }
-
-function randomLetter(excluded = "") {
-  const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
-
-  const excludedSet = new Set(
-    String(excluded || "").toUpperCase().replace(/[^A-Z]/g, "").split("")
-  );
-
-  let pool = alphabet.filter((ch) => !excludedSet.has(ch));
-
-  // se excluiu tudo (ou quase tudo), volta ao alfabeto completo
-  if (pool.length === 0) pool = alphabet;
-
-  return pool[Math.floor(Math.random() * pool.length)];
-}
-
 
 function publicRoom(roomId) {
   const room = rooms.get(roomId);
@@ -175,7 +160,14 @@ function startRoundNow(roomId) {
 
   room.state.round += 1;
   room.state.running = true;
-  room.state.letter = randomLetter(room.config.letters);
+
+  let pool = room.config.letters.split("");
+  const alphabet_s = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  let alphabet = alphabet_s.split("");
+
+  pool = (pool.length > 0) ? pool : alphabet;
+
+  room.state.letter = pool[Math.floor(Math.random() * pool.length)];
   room.state.roundStartAt = Date.now();
 
   room.state.readySet = new Set();
@@ -233,9 +225,6 @@ function emitPublicRoomsUpdate() {
 }
 
 
-
-
-
 io.on("connection", (socket) => {
   socket.on("room:listPublic", (cb) => {
     try {
@@ -244,7 +233,6 @@ io.on("connection", (socket) => {
       for (const [roomId, room] of rooms.entries()) {
         if (!room) continue;
 
-        // pública = sem password
         if (room.password) continue;
 
         const playerCount =
@@ -283,8 +271,6 @@ io.on("connection", (socket) => {
       if (cb) cb({ ok: false, error: "Erro ao listar salas." });
     }
   });
-
-
 
   socket.on("game:getState", ({ roomId }, cb) => {
     roomId = String(roomId || "").trim().toUpperCase();
@@ -357,11 +343,10 @@ io.on("connection", (socket) => {
     cancelRoomDeletion(roomId);
 
     const safeConfig = {
-      timePerRound: Number(config && config.timePerRound) || 60,
-      rounds: Number(config && config.rounds) || 10,
+      timePerRound: Number(config && config.timePerRound),
+      rounds: Number(config && config.rounds),
       letters: String(config && config.letters || "").toUpperCase().replace(/[^A-Z]/g, "")
     };
-
 
     rooms.set(roomId, {
       createdAt: Date.now(),
@@ -436,7 +421,14 @@ io.on("connection", (socket) => {
       r.state.endRequested = false;
       if (r.state.endTimer) { clearTimeout(r.state.endTimer); r.state.endTimer = null; }
 
-      r.state.letter = randomLetter(r.config.letters);
+
+      let pool = r.config.letters.split("");
+      const alphabet_s = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+      let alphabet = alphabet_s.split("");
+
+      pool = (pool.length > 0) ? pool : alphabet;
+
+      r.state.letter = pool[Math.floor(Math.random() * pool.length)];
       r.state.roundStartAt = Date.now();
 
       io.to(roomId).emit("game:roundStarted", {
@@ -520,7 +512,13 @@ io.on("connection", (socket) => {
     room.state.endRequested = false;
     if (room.state.endTimer) { clearTimeout(room.state.endTimer); room.state.endTimer = null; }
 
-    room.state.letter = randomLetter(room.config.letters);
+    let pool = room.config.letters.split("");
+    const alphabet_s = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    let alphabet = alphabet_s.split("");
+
+    pool = (pool.length > 0) ? pool : alphabet;
+
+    room.state.letter = pool[Math.floor(Math.random() * pool.length)];
     room.state.roundStartAt = Date.now();
 
     io.to(roomId).emit("game:roundStarted", {

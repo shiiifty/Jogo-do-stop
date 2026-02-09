@@ -49,8 +49,6 @@ document.addEventListener("DOMContentLoaded", function () {
   const savedPassword = localStorage.getItem("roomPassword") || "";
 
   window.api.joinRoom({ roomId, nickname, avatar, password: savedPassword }, function (res) {
-    console.log("joinRoom lobby res:", res);
-
     if (res && res.ok) return;
 
     alert((res && res.error) ? res.error : "Erro ao entrar na sala.");
@@ -120,8 +118,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
    if (startBtn) {
     startBtn.addEventListener("click", function () {
-      //localStorage.removeItem("roomPassword");
-
       window.socket.emit("game:goToGame", { roomId, seconds: 5 }, function (res) {
         if (res && res.ok) return;
         alert((res && res.error) ? res.error : "Erro ao iniciar o jogo.");

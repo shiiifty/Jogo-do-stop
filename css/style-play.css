@@ -380,10 +380,6 @@ body {
   color: #111;
 }
 
-/* ============================
-   OVERLAY - SALAS PÚBLICAS
-   ============================ */
-
 .all-rooms-overlay {
   position: fixed;
   inset: 0;
@@ -395,13 +391,12 @@ body {
   padding: 16px;
 }
 
-/* caixa/modal principal */
 .all-rooms-overlay .modal {
   width: min(780px, 92vw);
   max-height: 80vh;
   overflow: auto;
 
-  background: #4f74ff;               /* a mesma vibe do join-card */
+  background: #4f74ff;               
   border-radius: 28px;
   padding: 26px 26px 20px;
   box-shadow: 0 18px 45px rgba(0,0,0,.55);
@@ -411,7 +406,6 @@ body {
   font-family: "Luckiest Guy", system-ui, sans-serif;
 }
 
-/* header */
 .all-rooms-overlay .modal-header {
   display: flex;
   align-items: center;
@@ -428,7 +422,6 @@ body {
   text-shadow: 0 6px 0 rgba(0,0,0,.22);
 }
 
-/* botão X */
 #all-rooms-close {
   width: 44px;
   height: 44px;
@@ -454,7 +447,6 @@ body {
   box-shadow: 0 5px 0 rgba(0,0,0,.25);
 }
 
-/* mensagens */
 #rooms-loading,
 #rooms-empty {
   background: rgba(0,0,0,.20);
@@ -468,14 +460,12 @@ body {
   text-shadow: 0 3px 0 rgba(0,0,0,.18);
 }
 
-/* lista */
 .rooms-list {
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
 
-/* cada sala (tu crias no JS como button.room-row) */
 .room-row {
   width: 100%;
   text-align: left;
@@ -501,7 +491,6 @@ body {
   box-shadow: 0 6px 0 rgba(0,0,0,.22);
 }
 
-/* layout interno que já estás a gerar no innerHTML */
 .room-main {
   display: flex;
   align-items: baseline;
@@ -533,7 +522,6 @@ body {
   opacity: .9;
 }
 
-/* badges */
 .badge {
   display: inline-flex;
   align-items: center;
@@ -553,7 +541,6 @@ body {
   background: #d9f7d9;
 }
 
-/* mobile */
 @media (max-width: 520px) {
   .all-rooms-overlay .modal {
     padding: 18px 16px 14px;

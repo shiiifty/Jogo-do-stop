@@ -1,6 +1,3 @@
-/* ============================
-   FUNDO E CAIXA PRINCIPAL
-   ============================ */
 body {
   margin: 0;
   min-height: 100vh;
@@ -30,9 +27,6 @@ body.fade-out {
   flex-direction: column;
 }
 
-/* ============================
-   LOGO STOP!
-   ============================ */
 .logo-row {
   display: flex;
   justify-content: center;
@@ -313,10 +307,6 @@ body.fade-out {
   color: #FFD93D;
 }
 
-/* =========================
-   OVERLAY (estilo do jogo) - LIMPO
-   ========================= */
-
 .overlay.hidden { display: none; }
 
 .overlay{
@@ -330,13 +320,12 @@ body.fade-out {
   z-index: 9999;
 }
 
-/* painel do overlay */
 .overlay-card{
   width: min(1150px, 96vw);
   max-height: 85vh;
   overflow: auto;
 
-  background: #4169E1;                 /* azul do teu jogo */
+  background: #4169E1;                
   border-radius: 26px;
   padding: 22px 24px;
 
@@ -376,7 +365,6 @@ body.fade-out {
   text-shadow: none;
 }
 
-/* controls */
 .overlay-controls{
   display:flex;
   align-items:center;
@@ -411,14 +399,13 @@ body.fade-out {
 }
 
 .timerpill{
-  background: #FF595E;                 /* vermelho STOP */
+  background: #FF595E;                 
   color: #111;
   border-radius: 999px;
   padding: 10px 14px;
   box-shadow: 0 6px 0 rgba(0,0,0,0.25);
 }
 
-/* categoria */
 .category-title{
   margin: 8px 0 12px;
   font-size: 22px;
@@ -427,7 +414,6 @@ body.fade-out {
   text-shadow: 0 3px 0 rgba(0,0,0,0.25);
 }
 
-/* tabela */
 .compare-table{
   display: grid;
   grid-template-columns: 1.2fr 2fr 0.7fr;
@@ -461,14 +447,12 @@ body.fade-out {
   box-shadow: 0 4px 0 rgba(0,0,0,0.18);
 }
 
-/* footer */
 .overlay-footer{
   margin-top: 12px;
   padding-top: 10px;
   border-top: 3px solid rgba(255,255,255,0.25);
 }
 
-/* mobile */
 @media (max-width: 720px){
   #compare-title{ font-size: 30px; }
   .compare-table{ grid-template-columns: 1fr; }
@@ -502,7 +486,6 @@ body.fade-out {
 }
 
 
-/* “título” automático (sem mexer no HTML) */
 #results-overlay .results-table::before{
   content: "Resultados finais";
   display: block;
@@ -517,18 +500,16 @@ body.fade-out {
   border-bottom: 3px solid rgba(255,255,255,0.25);
 }
 
-/* Tabela dentro do results-table (tu crias compare-row/cell via JS) */
 #results-overlay .results-table .compare-row{
   display: contents;
 }
 
 #results-overlay .results-table{
   display: grid;
-  grid-template-columns: 1.6fr 0.8fr; /* Jogador | Pontos */
+  grid-template-columns: 1.6fr 0.8fr; 
   gap: 10px;
 }
 
-/* Reusa o estilo da compare-cell/head/badge */
 #results-overlay .compare-cell{
   background: #ffffff;
   color: #111;
@@ -547,12 +528,11 @@ body.fade-out {
   display:inline-block;
   padding: 8px 12px;
   border-radius: 999px;
-  background: #FFD93D;                 /* amarelo do teu logo */
+  background: #FFD93D;                 
   color: #111;
   box-shadow: 0 4px 0 #b8860b;
 }
 
-/* Botão "Ver resultados" no overlay */
 #close-btn{
   margin-top: 14px;
   width: min(260px, 90vw);
@@ -599,7 +579,6 @@ body.fade-out {
   box-shadow: 0px 3px 0 #b8860b;
 }
 
-/* Mobile */
 @media (max-width: 720px){
   #results-overlay .results-table::before{ font-size: 30px; }
   #results-overlay .results-table{ grid-template-columns: 1fr; }

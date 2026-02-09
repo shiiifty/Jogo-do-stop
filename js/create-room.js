@@ -23,9 +23,8 @@ document.addEventListener("DOMContentLoaded", function () {
     const avatar = localStorage.getItem("playerAvatar") || "default";
  
     const gameConfig = JSON.parse(localStorage.getItem("gameConfig") || "null");
-    console.log("gameConfig");
 
-    const config = gameConfig || { timePerRound: 60, rounds: 10, letters: "" };
+    const config = gameConfig;
     return { nickname, avatar, config };
   }
 
@@ -85,7 +84,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
           const gameConfig = {
             timePerRound: time,
-            letter: letters,
+            letters: letters,
             rounds: total_rounds,
           };
 
@@ -98,7 +97,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
   if (privateBtn && popup) {
     privateBtn.addEventListener("click", function () {
-
       configOverlay.classList.remove("hidden");
 
       if (configStartBtn) {
@@ -118,7 +116,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
           const gameConfig = {
             timePerRound: time,
-            letter: letters,
+            letters: letters,
             rounds: total_rounds,
           };
 

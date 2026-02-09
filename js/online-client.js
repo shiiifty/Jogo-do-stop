@@ -16,7 +16,6 @@ window.api = {
     });
   },
 
-
   joinRoom: function ({ roomId, nickname, avatar, password }, cb) {
     window.socket.emit("room:join", { roomId, nickname, avatar, password }, cb);
   },
@@ -39,15 +38,3 @@ window.api = {
   }
 
 };
-
-window.socket.on("room:update", function (room) {
-  console.log("room:update", room);
-});
-
-window.socket.on("game:roundStarted", function (payload) {
-  console.log("roundStarted", payload);
-});
-
-window.socket.on("game:roundEnded", function (payload) {
-  console.log("roundEnded", payload);
-});

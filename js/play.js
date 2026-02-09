@@ -43,7 +43,6 @@ document.addEventListener("DOMContentLoaded", function () {
   
   let nextRoundCountdownTimer = null;
 
-
   if (closeBtn) {
     closeBtn.addEventListener("click", function () {
       window.location.href = "../index.html";
@@ -56,7 +55,6 @@ document.addEventListener("DOMContentLoaded", function () {
       else window.location.href = "../index.html";
     });
   }
-
 
   if (compareNextRoundBtn) {
     compareNextRoundBtn.addEventListener("click", function () {
@@ -362,7 +360,6 @@ document.addEventListener("DOMContentLoaded", function () {
     } catch (e) {
       console.warn("Config inválida, uso defaults.");
     }
-    localStorage.removeItem("gameConfig");
   }
 
   let timeLeft = config.timePerRound;
@@ -595,8 +592,6 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     });
   }
-
-
 
   if (closeScoreBtn) {
     closeScoreBtn.addEventListener("click", function () {
